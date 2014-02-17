@@ -1,0 +1,127 @@
+Requirement: Follow these steps: (tested on Mint 15 32bit edition but should work on all debian 32bit based distributions)
+
+
+Commands:
+#sudo su
+
+=>install subversion
+#apt-get install subversion
+
+=>install python
+#apt-get install python
+
+=>install make
+#apt-get install make
+
+=>install nano
+#apt-get install nano
+
+
+=>copy the folder to local disk using svn
+#svn checkout http://yalih-honeypot.googlecode.com/svn/ yalih-honeypot
+#cd yalih-honeypot
+
+
+=>JSbeautifier
+from the terminal, in the honeypot folder, run the following commands:
+
+#cd jsbeautifier
+#python setup.py build
+#python setup.py install
+
+
+=>install rhino
+#sudo apt-get install rhino
+
+
+=>install ClamAV
+#sudo apt-get install clamav
+
+
+=>install AVG
+Download AVG package from the following website for your distribution (These are 32bit editions)
+http://free.avg.com/us-en/download.prd-alf
+
+if deb file is downloaded:
+#dpkg -i (name of the .deb file)
+#sysctl -w kernel.shmmax=128000000
+
+if you are installing on a 64bit system, you may need to install the following packages for AVG to run properly:
+
+ai32-bit
+glibc.i686
+
+
+
+=>install Yara
+
+yara requires:
+
+#apt-get install g++
+#apt-get install python-dev
+#apt-get install libpcre3-dev
+#apt-get install libpcre3
+#apt-get install libpcre3-dev
+#apt-get install flex
+#apt-get install bison
+
+
+#cd req
+#tar -xzvf yara-2.0.0.tar.gz
+#cd yara-2.0.0
+#./configure
+#make
+#make install
+
+
+=>install yara for python
+#cd yara-python
+# python setup.py build
+# python setup.py install
+#echo "/usr/local/lib" >> /etc/ld.so.conf
+#ldconfig
+
+
+=>install easy_install
+#cd req
+#cd ez_setup-0.9
+#apt-get install python-setuptools
+
+
+=>install python lxml
+#apt-get install python-lxml
+
+
+=>install python-magic
+#pip install python-magic
+or
+get the python-magic egg link for your python version from the website: https://pypi.python.org/pypi/python-magic/
+and run the following command:
+#easy_install (your link)
+
+
+
+=============================================================================
+Running the honeypot
+
+Before using the honeypot, make sure you update the signatures by running the following command. This may take a while!
+
+#./honeypot.py update
+
+
+=>Running the honeypot
+#python honeypot.py --url www.yahoo.com
+#python honeypot.py --file /opt/somefile-that-contains-a-list-of-suspecious-URLs.txt
+
+for more information run:
+
+#python honeypot.py --help
+
+
+
+=============================================================================
+*** Scan log files are stored in the "scanlogs" folder.
+*** you can get extra information about redirections, fobideen sites and error messages in the debug folder (debug files are stored based on the date and time of scan)
+*** certain aspects of the honeyclient can be configure from the honeypotconfig.py file
+
+Cheers

@@ -1,0 +1,7 @@
+#!/usr/bin/python
+#
+# Stub script to run jsbeautifier
+#
+import sys
+from jsbeautifier import main
+sys.exit(main())

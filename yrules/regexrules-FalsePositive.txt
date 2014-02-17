@@ -1,0 +1,178 @@
+Regex Rules
+
+  - (<script.+?KLiHKYfJYrNAaLJ.+?JcHHoKmHL.+?K5JANHYL.*?<\/script>)
+  - Known obfuscated Javascript malware.
+  - MU:RE
+
+
+- - 6.1  - (<script.+?function\spL.+?7syavpwey.+?oVdVyV.*?<\/script>)
+  - Known obfuscated Javascript malware.
+  - MU:RE
+
+
+- - 6.2
+  - (<script.+?YxfRQZcJr.+?fwmuagM.+?ryoADKY.*?<\/script>)
+  - Known obfuscated Javascript malware.
+  - MU:RE
+
+
+- - 6.3
+  - (<script.+?function\syJ.+?hjeIaIdI.+?bGiKlAiKtHyH.*?<\/script>)
+  - Known obfuscated Javascript malware.
+  - MU:RE
+
+
+- - 2.1
+  - (<script.+?eval\s*\(\s*unescape.+?\).*?<\/script>)
+  - Javascript 'eval' and 'unescape' functions detected, possible obfuscated malicious code.
+  - MU:RE
+
+
+- - 2.4
+  - (<script.+?eval\s*\(\s*function.+?\).*?<\/script>)
+  - Javascript 'eval' and 'function' detected, possible obfuscated malicious code.
+  - MU:RE
+
+
+- - 2.0
+  - (<script.+?unescape\s*\(.+?\).*?<\/script>)
+  - Javascript 'unescape' function detected, possible obfuscated malicious code.
+  - MU:RE
+
+
+- - 2.2
+  - (<script.+?<iframe.+?(?:visibility\s*:\s*hidden|display\s*:\s*none|style\s*=\s*['\"]?hidden|\s(?:width|height)\s*=\s*['\"]?[01][\'"\s]).*?>.+?<\/script>)
+  - Javascript hidden iframe tag detected.
+  - MU:RE
+
+
+- - 2.3
+  - (<script.+?src\s*=\s*['\"]?(?:ht|f)tp.+?>(?:.*?<\/script>)?)
+  - Javascript code from remote source detected.
+  - LN:LO
+
+
+- - 1.0
+  - (<iframe.+?(?:visibility\s*:\s*hidden|display\s*:\s*none|style\s*=\s*['\"]?hidden|\s(?:width|height)\s*=\s*['\"]?[01][\'"\s]).+?<\/iframe>)
+  - Hidden iframe tag detected.
+  - MU:RE
+
+
+- - 1.1
+  - (<iframe.+?(?:visibility\s*:\s*hidden|display\s*:\s*none|style\s*=\s*['\"]?hidden|\s(?:width|height)\s*=\s*['\"]?[01][\'"\s]).*?>)
+  - Incomplete hidden iframe tag detected.
+  - LN:RE
+
+
+- - 3.0
+  - (<object.+?classid.+?target.*?>.*?<\/object>)
+  - ActiveX object 'target' detected, possible malicious code to exploit IE vulnerability.
+  - MU:RE
+
+
+- - 3.1
+  - (<script.+?vbscript.*?>.+?<\/script>)
+  - VBScript code detected, sometimes used to exploit IE vulnerability.
+  - MU:RE
+
+
+- - 5.5
+  - ((?:print|echo)\s*\(\s*gzinflate\s*\(.+?\)\s*\)\s*;)
+  - PHP 'print/echo' and 'gzinflate' functions detected, possible encoded malicious code.
+  - MU:LO
+
+
+- - 5.4
+  - ((?:print|echo)\s*\(\s*base64_decode\s*\(.+?\)\s*\)\s*;)
+  - PHP 'print/echo' and 'base64_decode' functions detected, possible encoded malicious code.
+  - MU:LO
+
+
+- - 5.3
+  - (eval\s*\(\s*gzinflate\s*\(.+?\)\s*\)\s*;)
+  - PHP 'eval' and 'gzinflate' functions detected, possible encoded malicious code.
+  - MU:RE
+
+
+- - 5.2
+  - (eval\s*\(\s*base64_decode\s*\(.+?\)\s*\)\s*;)
+  - PHP 'eval' and 'base64_decode' functions detected, possible encoded malicious code.
+  - MU:LO
+
+- - 4.0
+  - ((?:shellcode|(?:LPORT|EXITFUNC|Encoder)=))
+  - Dangerous word detected, CHECK THE FILE!
+
+
+==============================
+
+
+<rule>(?:[\w.-]+@[\w.-]+%(?:[01]\w)+\w+:)</rule>
+<description>Detects common mail header injections</description>
+
+
+for Javascript
+<rule>(?:function[^(]*\([^)]*\))|(?:(?:delete|void|throw|instanceof|new|typeof)\W+\w+\s*[([])|([)\]]\s*\.\s*\w+\s*=)|(?:\(\s*new\s+\w+\s*\)\.)</rule>
+<description>Detects common function declarations and special JS operators</description>
+
+
+==============================
+
+
+#not used
+<rule>(?:(?:[;]+|(<[?%](?:php)?)).*[^\w](?:echo|print|print_r|var_dump|[fp]open))|(?:;\s*rm\s+-\w+\s+)|(?:;.*{.*\$\w+\s*=)|(?:\$\w+\s*\[\]\s*=\s*)</rule>
+<description>Detects code injection attempts 3/3</description>
+
+
+#not used
+<rule>(?:@[\w-]+\s*\()|(?:]\s*\(\s*["!]\s*\w)|(?:<[?%](?:php)?.*(?:[?%]>)?)|(?:;[\s\w|]*\$\w+\s*=)|(?:\$\w+\s*=(?:(?:\s*\$?\w+\s*[(;])|\s*".*"))|(?:;\s*\{\W*\w+\s*\()</rule><description>Detects code injection attempts 1/3</description>
+
+
+#Not Used -
+<rule>(?:\\x[01FE]\w)|(?:%[01FE]\w)|(?:&#[01FE]\w)|(?:\\[01FE][0-9a-f])|(?:&#x[01FE]\w)</rule><description>Detects nullbytes and HTTP response splitting</description>
+
+#not used
+<rule>(?:\<base\s+)|(?:<!(?:element|entity|\[CDATA))</rule>
+<description>Detects base href injections and XML entity injections
+
+
+<rule>(?:firefoxurl:\w+\|)|(?:(?:file|res|telnet|nntp|news|mailto|chrome)\s*:\s*[%&#xu\/]+)|(wyciwyg|firefoxurl\s*:\s*\/\s*\/)</rule>
+<description>Detects IE firefoxurl injections, cache poisoning attempts and local file inclusion/execution
+
+
+<rule>(?:\/[\w\s]+\/\.)|(?:=\s*\/\w+\/\s*\.)|(?:\[\s*\/\w+)|(?:(?:this|window|top|parent|frames|self|content)\[\s*\w)</rule><description>Detects basic obfuscated JavaScript script injections
+
+
+<rule>(?:[^\s]\s*=\s*script)|(?:\.\s*constructor)|(?:default\s+xml\s+namespace\s*=)</rule><description>Detects advanced XSS probings via Script(), constructors and XML namespaces</description>
+
+
+gives false positive
+<rule>(?:(?:\/|\\)?\.\.(\/|\\)(?:\.\.)?)|(?:\w+\.exe\??\s)|(?:;\s*\w+\s*\/[\w*-]+\/)|(?:\d\.\dx\|)|(?:%(?:c0\.|af\.|5c\.))|(?:\/(?:%2e){2})</rule>
+<description>Detects basic directory traversal</description>
+
+
+<rule>(?:\W\s*hash\s*[^\w\s-])|(?:\w+=\W*[^,]*,[^\s(]\s*\()|(?:\?"[^\s"]":)|(?:(?<!\/)__[a-z]+__)|(?:(?:^|[\s)\]\}])(?:s|g)etter\s*=)</rule><description>Detects hash-contained xss payload attacks, setter usage and property overloading</description>
+
+================================
+
+Regex for a simple CSS attack:
+/((\%3C)|<)((\%2F)|\/)*[a-z0-9\%]+((\%3E)|>)/ix
+
+((\%3C)|<) - check for opening angle bracket or hex equivalent
+((\%2F)|\/)* - the forward slash for a closing tag or its hex equivalent
+[a-z0-9\%]+ - check for alphanumeric string inside the tag, or hex representation of these
+((\%3E)|>) - check for closing angle bracket or hex equivalent
+
+
+3.2 Regex for "<img src" CSS attack
+/((\%3C)|<)((\%69)|i|(\%49))((\%6D)|m|(\%4D))((\%67)|g|(\%47))[^\n]+((\%3E)|>)/I 
+
+Explanation:
+(\%3C)|<) opening angled bracket or hex equivalent
+(\%69)|i|(\%49))((\%6D)|m|(\%4D))((\%67)|g|(\%47) the letters 'img' in varying combinations of ASCII, or upper or lower case hex equivalents
+[^\n]+ any character other than a new line following the <img
+(\%3E)|>) closing angled bracket or hex equivalent
+
+
+
+

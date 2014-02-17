@@ -1,0 +1,18 @@
+This client honeypot was designed at the Victoria University of Wellington, New Zealand by Masood Mansoori as a part of his PhD research.
+This software includes code from other open source projects which credits are given below.
+
+Special Thanks to two main contributors/Developers for their invaluable contributions.
+
+Singapore Polytechnic
+Lai Qi Wei  -  laiqiwei30@hotmail.com
+Ritchie Lam Qiaowei  -  ritchielq@gmail.com
+
+
+Special thanks to the developers of:
+
+Yara Project -			http://plusvic.github.io/yara/
+Python Mechanize -		http://wwwsearch.sourceforge.net/mechanize/
+js-beautify -			https://github.com/einars/js-beautify
+Yara-Generator - 		https://github.com/Xen0ph0n/YaraGenerator
+
+and anyone on forums etc for helping with the code.
