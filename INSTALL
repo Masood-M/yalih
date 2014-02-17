@@ -75,9 +75,10 @@ yara requires:
 
 
 =>install yara for python
+yara folder contains another folder called yara-python.
 #cd yara-python
-# python setup.py build
-# python setup.py install
+#python setup.py build
+#python setup.py install
 #echo "/usr/local/lib" >> /etc/ld.so.conf
 #ldconfig
 
