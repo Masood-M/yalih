@@ -58,6 +58,9 @@ glibc.i686
 yara requires:
 
 #apt-get install g++
+#apt-get install autoconf
+#apt-get install automake
+#apt-get install libtool
 #apt-get install python-dev
 #apt-get install libpcre3-dev
 #apt-get install libpcre3
@@ -66,9 +69,15 @@ yara requires:
 #apt-get install bison
 
 
+Yara 2.0
 #cd req
 #tar -xzvf yara-2.0.0.tar.gz
 #cd yara-2.0.0
+#./build.sh
+#sudo make install
+
+
+Yara 1.7
 #./configure
 #make
 #make install
