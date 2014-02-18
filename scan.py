@@ -15,7 +15,7 @@ def scanning(path):
 	os.chdir(path)
 		
 	start_time = time.time()
-	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log", "a") as f:
+	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log", "w") as f:
 		print "\n================ ClamAV Antivirus Engine is running! Please Wait ===============" 
 		f.write("======================================ClamAV======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
@@ -24,17 +24,16 @@ def scanning(path):
 		for line in iter(process.stdout.readline, ''):
 			sys.stdout.write(line)
 			f.write(line)
-		f.write("\nclamscan -r --stdout --infected --scan-html=yes --scan-pdf=yes --scan-archive=yes --algorithmic-detection=yes " + os.getcwd() + "\n\n")
+		f.write("\nclamscan -r --stdout --infected --scan-html=yes --scan-pdf=yes --scan-archive=yes -i --algorithmic-detection=yes " + os.getcwd() + "\n\n")
 		finish_time = time.time() - start_time, "seconds"
 		f.write("Scanning time with ClamAV engine was: " + str(finish_time) + "\n\n")
 		print "================================================================================"	
 	
-'''
-Codes for avgscan
+#Codes for avgscan
 	os.chdir(path)
 		
 	start_time = time.time()
-	with open(honeypotconfig.wdir + "scanlogs/AVG-report.log", "a") as f:
+	with open(honeypotconfig.wdir + "scanlogs/AVG-report.log", "w") as f:
 		print "\n================ AVG Antivirus Engine is running! Please Wait ================" 
 		f.write("======================================AVG Antivirus======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
@@ -49,7 +48,7 @@ Codes for avgscan
 		finish_time = time.time() - start_time, "seconds"
 		f.write("Scanning time with AVG engine was: " + str(finish_time) + "\n\n")
 		print "==============================================================================="
-'''
+
 '''
 
 	os.chdir(path)
