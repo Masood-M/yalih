@@ -15,7 +15,7 @@ import honeypotconfig
 def listandscan(path):
 	start_timeYara = time.time()
 
-	with open(honeypotconfig.wdir + "scanlogs/Yara-report.log", "a") as f:
+	with open(honeypotconfig.wdir + "scanlogs/Yara-report.log", "w") as f:
 		print "\n===================================== Yara =====================================" 
 		f.write("======================================Yara======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
