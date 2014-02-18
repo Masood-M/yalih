@@ -138,7 +138,7 @@ def main():
 		
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-		unquote.unquoteDirectory()
+		unquote.unquoteDirectory(path)
 
 
 #Email
@@ -157,7 +157,7 @@ def main():
 		queue.join()
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-		unquote.unquoteDirectory()
+		unquote.unquoteDirectory(path)
 
 #File
 
@@ -179,7 +179,7 @@ def main():
 		fopen3.close()
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-		unquote.unquoteDirectory()
+		unquote.unquoteDirectory(path)
 
 
 
@@ -190,7 +190,7 @@ def main():
 		executemechanize.executemechanize(url)
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-		unquote.unquoteDirectory()
+		unquote.unquoteDirectory(path)
 
 
 #Search
@@ -216,7 +216,7 @@ def main():
 
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-		unquote.unquoteDirectory()
+		unquote.unquoteDirectory(path)
 
 
 
