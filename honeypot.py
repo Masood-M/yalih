@@ -34,8 +34,8 @@ logger = logging.getLogger()
 def worker():
 
 	urldict = queue.get()	
-	logger.info(str(urldict["counter"]) + ".[" + urldict["url"] + "]\t" + " => Visiting ")
-	executemechanize.executemechanize(urldict["url"])
+	logger.info(str(urldict["counter"]) + ",\t" + urldict["url"] + ",\t" + "Visiting")
+	executemechanize.executemechanize(urldict)
 	queue.task_done()
 	
 
@@ -232,8 +232,8 @@ def main():
 
 class SpecialFormatter(logging.Formatter):
 
-	FORMATS = {logging.ERROR : "[%(asctime)s] %(name)-24s %(error_code)3s %(levelname)-7s: %(message)s",
-			   'DEFAULT' :  "[%(asctime)s] %(name)-28s %(levelname)-7s: %(message)s"}
+	FORMATS = {logging.ERROR : "%(asctime)s,\t%(name)s,\t%(levelname)s,\t%(error_code)s,\t%(message)s",
+			   'DEFAULT' :  "%(asctime)s,\t%(name)s,\t%(levelname)s,\t,\t%(message)s"}
 			   
 	def formatTime(self, record, datefmt=None):
 		self._datefmt = time.strftime("%Y-%m-%d %H:%M:%S")

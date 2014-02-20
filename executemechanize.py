@@ -120,8 +120,11 @@ def js_extraction(response, scheme, host):
 	return jsurl_list_old, jsurl_list, url_list
 
 
-def executemechanize(url):
+def executemechanize(urldict):
 	
+	url = urldict["url"]
+	url_no = urldict["counter"]
+
 	#Array of redirections
 	threadlocal.__setattr__('redirection_list', [])	
 	
@@ -160,7 +163,7 @@ def executemechanize(url):
 		# Print redirection route if exist
 		threadlocal.__setattr__('redirect', mechanize._redirection.redirection())
 		if threadlocal.redirection_list:
-			logger.info("[" + url + "] Redirection Route: " + str(threadlocal.redirection_list))
+			logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
 		
 		# Convert url into valid file name
 		fdirname = urllib.quote_plus(url)
@@ -218,7 +221,7 @@ def executemechanize(url):
 		for link in jsurl_list_unique:
 			try:			
 				r = br.open(link, timeout=12.0)
-				logger.info("[" + url + "]" + " JS retrieve => " + link)	
+				logger.info(str(url_no) + ",\t" + url + ",\tJS retrieve,\t" + link)	
 				js_name = link[link.rfind("/") + 1:]
 				response = br.response().read()
 
@@ -244,9 +247,9 @@ def executemechanize(url):
 
 			except Exception, e:
 				try:	
-					logger.error("[" + url.strip() + "] " + str(e) + " => " + link,  extra = {'error_code' : str(e.code)})
+					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : str(e.code)})
 				except AttributeError:
-					logger.error("[" + url.strip() + "] " + str(e) + " => " + link, extra = {'error_code' : ""})
+					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : ""})
 
 		jsurl_list_unique.clear()
 
@@ -267,7 +270,7 @@ def executemechanize(url):
 				size = int(r.headers["Content-Length"]) / 1024
 				exename = link[link.rfind("/") + 1:]
 				if size < honeypotconfig.exe_max_size:
-					logger.info("[" + url + "]" + " EXE retrieve => " + link)
+					logger.info(str(url_no) + ",\t" + url + ",\t" + "EXE retrieve,\t" + link)
 					exe_file_path = os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder, first_char, second_char, fdirname, "exe", exename)
 					if honeypotconfig.proxy:
 						proxyname = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
@@ -276,19 +279,19 @@ def executemechanize(url):
 					exewrite.write(br.response().read())
 					exewrite.close()
 				else:
-					logger.info("[" + url + "]" + " EXE " + link + " is " + str(size) + "KB. Above exe_max_size and will not be downloaded.")	
+					logger.info(str(url_no) + ",\t" + url + ",\t" + "EXE " + str(size) + "KB above exe_max_size" + ",\t" + link)	
 			except Exception, e:
 				try:	
-					logger.error("[" + url.strip() + "] " + str(e) + " => " + link,  extra = {'error_code' : str(e.code)})
+					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : str(e.code)})
 				except AttributeError:
-					logger.error("[" + url.strip() + "] " + str(e) + " => " + link, extra = {'error_code' : ""})
+					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : ""})
 
 		del exe_list[:]
 		del url_list[:]
 
 	except Exception, e:
 		try:
-			logger.error("[" + url.strip() + "] " + str(e), extra = {'error_code' : str(e.code)})
+			logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e), extra = {'error_code' : str(e.code)})
 		except AttributeError:
-			logger.error("[" + url.strip() + "] " + str(e), extra = {'error_code' : ""})
+			logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e), extra = {'error_code' : ""})
 
