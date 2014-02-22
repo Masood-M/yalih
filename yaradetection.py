@@ -44,33 +44,4 @@ def yaradetect(inputfile):
 		print "%s" % m+ " found in file: " +inputfile
 		yarareport=reportfile.write(inputfile+"\t\t"+"%s" % m+"\n")
 
-
-
-def yaradetecthtml(htmlinputfile):
-	ruleinput='Dummy Value'
-	fin = open(honeypotconfig.wdir+"yrules/htmlrules.yara", 'r')
-	if fin:
-		ruleinput = fin.read()
-		fin.close()
-	rules = yara.compile(source=ruleinput)
-	f = open(htmlinputfile, 'r')
-	matches = rules.match(data=f.read())
-	for m in matches:
-		print "%s" % m+ " found in file: " +htmlinputfile
-		yarareport=reportfile.write(htmlinputfile+"\n")
-
-
-def yaradetectionparanoid(inputfile):
-	ruleinput='Dummy Value'
-	fin = open(honeypotconfig.wdir+"yrules/paranoid.yara", 'r')
-	if fin:
-		ruleinput = fin.read()
-		fin.close()
-	rules = yara.compile(source=ruleinput)
-	f = open(inputfile, 'r')
-	matches = rules.match(data=f.read())
-	for m in matches:
-		print "Paranoid Mode ==> %s" % m+ " found in file: " +inputfile
-		yarareport=reportfile.write(inputfile+"\n")
 '''
-
