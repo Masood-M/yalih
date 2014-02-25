@@ -7,18 +7,25 @@ Commands:
 =>install subversion
 #apt-get install subversion
 
+
 =>install python
 #apt-get install python
 
+
 =>install make
 #apt-get install make
+
 
 =>install nano
 #apt-get install nano
 
 
-=>copy the folder to local disk using svn
-#svn checkout http://yalih-honeypot.googlecode.com/svn/ yalih-honeypot
+=>install git
+#apt-get install git
+
+
+=>copy the folder to local disk using git
+#git clone https://github.com/Masood-M/yalih.git
 #cd yalih-honeypot
 
 
@@ -52,7 +59,6 @@ ai32-bit
 glibc.i686
 
 
-
 =>install Yara
 
 yara requires:
@@ -64,7 +70,6 @@ yara requires:
 #apt-get install python-dev
 #apt-get install libpcre3-dev
 #apt-get install libpcre3
-#apt-get install libpcre3-dev
 #apt-get install flex
 #apt-get install bison
 
@@ -93,8 +98,6 @@ yara folder contains another folder called yara-python.
 
 
 =>install easy_install
-#cd req
-#cd ez_setup-0.9
 #apt-get install python-setuptools
 
 

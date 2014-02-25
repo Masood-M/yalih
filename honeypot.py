@@ -187,7 +187,15 @@ def main():
 	if args.url:
 		url = readurl()
 		url = normalize.normalizeurl(url)
-		executemechanize.executemechanize(url)
+		dict={}
+			counter = 1
+			if not (url.startswith("http://")) and not (url.startswith("https://")):
+				url = "http://"+url
+			dict["url"] = line
+			dict["counter"] = counter
+			queue.put(dict)
+		queue.join()
+#		executemechanize.executemechanize(url)
 		scan.scanning(path)
 		yaradetection.listandscan(path)
 		unquote.unquoteDirectory(path)
