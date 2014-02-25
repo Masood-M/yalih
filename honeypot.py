@@ -188,12 +188,12 @@ def main():
 		url = readurl()
 		url = normalize.normalizeurl(url)
 		dict={}
-			counter = 1
-			if not (url.startswith("http://")) and not (url.startswith("https://")):
-				url = "http://"+url
-			dict["url"] = line
-			dict["counter"] = counter
-			queue.put(dict)
+		counter = 1
+		if not (url.startswith("http://")) and not (url.startswith("https://")):
+			url = "http://"+url
+		dict["url"] = line
+		dict["counter"] = counter
+		queue.put(dict)
 		queue.join()
 #		executemechanize.executemechanize(url)
 		scan.scanning(path)
