@@ -191,7 +191,7 @@ def main():
 		counter = 1
 		if not (url.startswith("http://")) and not (url.startswith("https://")):
 			url = "http://"+url
-		dict["url"] = line
+		dict["url"] = url
 		dict["counter"] = counter
 		queue.put(dict)
 		queue.join()
