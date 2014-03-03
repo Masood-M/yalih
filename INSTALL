@@ -4,9 +4,6 @@ Requirement: Follow these steps: (tested on Mint 15 32bit edition but should wor
 Commands:
 #sudo su
 
-=>install subversion
-#apt-get install subversion
-
 
 =>install python
 #apt-get install python
@@ -26,7 +23,7 @@ Commands:
 
 =>copy the folder to local disk using git
 #git clone https://github.com/Masood-M/yalih.git
-#cd yalih-honeypot
+#cd yalih
 
 
 =>JSbeautifier
@@ -119,7 +116,7 @@ Running the honeypot
 
 Before using the honeypot, make sure you update the signatures by running the following command. This may take a while!
 
-#./honeypot.py update
+#python honeypot.py update
 
 
 =>Running the honeypot
