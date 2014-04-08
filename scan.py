@@ -38,6 +38,8 @@ def scanning(path):
 		f.write("======================================AVG Antivirus======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
 		f.write("--------------------------------------------------------------------------------------------------------------------\n\n")
+		path=os.path.abspath(path)
+		path=path.replace(" ","\ ")
 		process = subprocess.Popen("avgscan --ignerrors -r " + honeypotconfig.wdir + "scanlogs/tmpavg.log " + path , shell=True, stdout=subprocess.PIPE)
 		for line in iter(process.stdout.readline, ''):
 			sys.stdout.write(line)
