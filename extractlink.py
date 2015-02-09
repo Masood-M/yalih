@@ -26,7 +26,7 @@ import sys, logging
 #from google import search
 import mechanize
 import executemechanize
-#from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import BeautifulSoup
 import normalize
 
 

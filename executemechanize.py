@@ -10,6 +10,7 @@ import urlparse, urllib, urllib2
 import lxml.html
 import magic, mimetypes
 import jsbeautifier
+import tldextract
 
 
 try:
@@ -162,8 +163,28 @@ def executemechanize(urldict):
 
 		# Print redirection route if exist
 		threadlocal.__setattr__('redirect', mechanize._redirection.redirection())
-		if threadlocal.redirection_list:
-			logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
+
+		# Extract and format URL
+		extracted = tldextract.extract(url)
+		print extracted
+		#formatted = "{}.{}".format(extracted.domain, extracted.tld)
+		formatted = "{}.{}.{}".format(extracted.subdomain, extracted.domain, extracted.tld)
+		print formatted
+		
+		# Extract each link in the redirection list and match it aginst the formatted URL
+		for eachredirect in threadlocal.redirection_list:
+			list_extract = tldextract.extract(eachredirect)
+			list_format = "{}.{}.{}".format(list_extract.subdomain, list_extract.domain, list_extract.tld)
+			print list_format
+			if list_format == formatted:
+				print "Match"
+			if not list_format == formatted:
+				if threadlocal.redirection_list:
+					logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
+					break
+		
+		#if threadlocal.redirection_list:
+			#logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
 		
 		# Convert url into valid file name
 		fdirname = urllib.quote_plus(url)
@@ -291,7 +312,9 @@ def executemechanize(urldict):
 
 	except Exception, e:
 		try:
-			logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e), extra = {'error_code' : str(e.code)})
+			logger.error(str(url_no) + ",\t" + url.strip() + "\tpoop" + ",\t" + str(e), extra = {'error_code' : str(e.code)})
 		except AttributeError:
-			logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e), extra = {'error_code' : ""})
-
+			if "Errno" in str(e.reason):
+				logger.error(str(url_no) + ",\t" + url.strip() + "\tpoop" +",\t" + "Error 418: I'm a teapot", extra = {'error_code' : ""})
+			else:
+				logger.error(str(url_no) + ",\t" + url.strip() + "\tpoop" +",\t" + str(e), extra = {'error_code' : ""})

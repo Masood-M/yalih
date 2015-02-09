@@ -1,0 +1,31 @@
+Waiting for first url to be done
+['http://www.omniglot.com/language/phrases/hello.htm', 'http://store.hello-gorgeous.net/', 'http://hellomerch.com/', 'http://hellokitty.com/', 'http://www.helloworld.com/']
+
+Last scanned file: http://hellomerch.com/
+Restarting honeypot.py, Yalih honeypot has stop making network connections
+['http://www.omniglot.com/language/phrases/hello.htm', 'http://hellomerch.com/', 'http://www.helloworld.com/', 'http://www.hellobank.com/', 'http://www.desicomments.com/desi/hello/']
+
+Last scanned file: http://www.hellobank.com/
+Restarting honeypot.py, Yalih honeypot has stop making network connections
+Last scanned file: http://www.hellobank.com/
+['http://www.omniglot.com/language/phrases/hello.htm', 'http://hellomerch.com/', 'http://www.helloworld.com/', 'http://www.hellobank.com/', 'http://www.desicomments.com/desi/hello/']
+
+Waiting for first url to be done
+Restarting honeypot.py, Yalih honeypot has stop making network connections
+Waiting for first url to be done
+Waiting for first url to be done
+['http://www.omniglot.com/language/phrases/hello.htm', 'http://hellomerch.com/', 'http://www.helloworld.com/', 'http://www.hellobank.com/', 'http://www.desicomments.com/desi/hello/']
+
+Last scanned file: http://hellomerch.com/
+Restarting honeypot.py, Yalih honeypot has stop making network connections
+Last scanned file: http://hellomerch.com/
+Last scanned file: http://hellomerch.com/
+Last scanned file: http://hellomerch.com/
+['http://www.omniglot.com/language/phrases/hello.htm', 'http://hellomerch.com/', 'http://www.helloworld.com/', 'http://www.hellobank.com/', 'http://www.desicomments.com/desi/hello/']
+
+Completed scanning, terminating honeypotMonitor
+Completed scanning, terminating honeypotMonitor
+Completed scanning, terminating honeypotMonitor
+Completed scanning, terminating honeypotMonitor
+Completed scanning, terminating honeypotMonitor
+Waiting for first url to be done

@@ -13,7 +13,7 @@ def searchBing(keyword):
 	quoted_query = urllib.quote(queryBingFor)
 	account_key = "Unolx7kLAlLp1NSwmPyis9df+ecjQeN9pqGe57sW/D8="
 	rootURL = "https://api.datamarket.azure.com/Bing/Search/"
-	searchURL = rootURL + "Web?$format=json&Query=" +quoted_query+ "&$top=50&$skip="+str(honeypotconfig.starturl)
+	searchURL = rootURL + "Web?$format=json&Query=" +quoted_query+ "&$top=1&$skip="+str(honeypotconfig.starturl)
 	username="masood.mansoori@live.com"
 	password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
 	password_mgr.add_password(None, searchURL,username,account_key)
@@ -100,7 +100,7 @@ def searchBing(keyword):
 	quoted_query = urllib.quote(queryBingFor)
 	account_key = "Unolx7kLAlLp1NSwmPyis9df+ecjQeN9pqGe57sW/D8="
 	rootURL = "https://api.datamarket.azure.com/Bing/Search/"
-	searchURL = rootURL + "Web?$format=json&Query=" +quoted_query+ "&$top=50&$skip="+str(nextsearch)
+	searchURL = rootURL + "Web?$format=json&Query=" +quoted_query+ "&$top=5&$skip="+str(nextsearch)
 	username="masood.mansoori@live.com"
 	password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
 	password_mgr.add_password(None, searchURL,username,account_key)

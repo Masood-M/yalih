@@ -69,6 +69,8 @@ yara requires:
 #apt-get install libpcre3
 #apt-get install flex
 #apt-get install bison
+#pip install psutil
+#pip install tldextract
 
 
 Yara 2.0
@@ -127,7 +129,24 @@ for more information run:
 
 #python honeypot.py --help
 
+=>Running the honeypot with monitoring
+#python honeypotMonitor --url www.yahoo.com
+#python honeypotMonitor.py --file /opt/somefile-that-contains-a-list-of-suspecious-URLs.txt
 
+HoneypotMonitor accepts the same argurements as the original honeypot.py
+
+=>Report Generator Scripts (Inside scripts folder)
+1) Extracts and appends connection refused links to connectionrefused.txt
+#python extractconnectionrefuse.py sample.log
+
+2) Extracts and appends forbidden links to forbidden.txt
+#python extractforbidden.py sample.log
+
+3) Extracts and appends redirection links to links.txt
+#python redirectionlinks.py /home/user/yalih/debug /home/user/yalih/links.txt
+
+4) Compares the differences between two log files
+#python comparelog.py file1.log file2.log
 
 =============================================================================
 *** Scan log files are stored in the "scanlogs" folder.
