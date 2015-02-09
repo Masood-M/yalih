@@ -5,7 +5,7 @@ import string
 from os.path import basename
 
 
-wdir="/opt/yalih/" #set your working directory - should start and end with "/" without quotations
+wdir="/root/yalih/" #set your working directory - should start and end with "/" without quotations
 useragent="Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)" #Internet explorer identifies itself as Mozilla/4.0 - MSIE 7.0 is Internet Explorer Version and Windows NT 5.1 is Windows XP
 acceptlang="en-us,en;q=0.5"
 referrer="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source="
@@ -58,4 +58,7 @@ proxy={}
 #====The maximum size for executables that would be downloaded, in kb
 exe_max_size = 800
 
+#====HoneypotMonitor, in sec
+checkfrequency = 100
+staticScanMaxTime = 100
 
