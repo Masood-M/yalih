@@ -166,7 +166,7 @@ def executemechanize(urldict):
 
 		# Extract and format URL
 		extracted = tldextract.extract(url)
-		print extracted
+#		print extracted
 		#formatted = "{}.{}".format(extracted.domain, extracted.tld)
 		formatted = "{}.{}.{}".format(extracted.subdomain, extracted.domain, extracted.tld)
 		print formatted
@@ -175,9 +175,9 @@ def executemechanize(urldict):
 		for eachredirect in threadlocal.redirection_list:
 			list_extract = tldextract.extract(eachredirect)
 			list_format = "{}.{}.{}".format(list_extract.subdomain, list_extract.domain, list_extract.tld)
-			print list_format
+#			print list_format
 			if list_format == formatted:
-				print "Match"
+#				print "Match"
 			if not list_format == formatted:
 				if threadlocal.redirection_list:
 					logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))

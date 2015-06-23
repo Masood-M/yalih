@@ -11,7 +11,7 @@ from YaraGenerator import yaraGenerator
  
  
 min_file_req = 2      # Minimum number of files that match with each other in order to be considered as a rule
-min_string_req = 3    # Minimum number of Srings in a rule for the rule to be considered
+min_string_req = 3    # Minimum number of Strings in a rule for the rule to be considered
 
 
 def create_directory(directory_name):
