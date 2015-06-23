@@ -155,9 +155,9 @@ def main():
 			dict["counter"] = counter
 			queue.put(dict)
 		queue.join()
-		scan.scanning(path)
-		yaradetection.listandscan(path)
-		unquote.unquoteDirectory(path)
+#		scan.scanning(path)
+#		yaradetection.listandscan(path)
+#		unquote.unquoteDirectory(path)
 
 #File
 
@@ -177,9 +177,9 @@ def main():
 			queue.put(dict)
 		queue.join()
 		fopen3.close()
-		scan.scanning(path)
-		yaradetection.listandscan(path)
-		unquote.unquoteDirectory(path)
+#		scan.scanning(path)
+#		yaradetection.listandscan(path)
+#		unquote.unquoteDirectory(path)
 
 
 
@@ -196,9 +196,9 @@ def main():
 		queue.put(dict)
 		queue.join()
 #		executemechanize.executemechanize(url)
-		scan.scanning(path)
-		yaradetection.listandscan(path)
-		unquote.unquoteDirectory(path)
+#		scan.scanning(path)
+#		yaradetection.listandscan(path)
+#		unquote.unquoteDirectory(path)
 
 
 #Search
