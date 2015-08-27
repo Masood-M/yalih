@@ -177,7 +177,7 @@ def executemechanize(urldict):
 			list_format = "{}.{}.{}".format(list_extract.subdomain, list_extract.domain, list_extract.tld)
 #			print list_format
 			if list_format == formatted:
-#				print "Match"
+				pass
 			if not list_format == formatted:
 				if threadlocal.redirection_list:
 					logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))

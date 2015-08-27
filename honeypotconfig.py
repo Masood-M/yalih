@@ -46,7 +46,7 @@ tmpfolder="tmp/" #followed by / sign
 
 #====Number of Threads
 #====Worker threads = threadnum - 2
-threadnum=12
+threadnum=10
 
 #====JSBeautifier
 jsbeautifier = False
