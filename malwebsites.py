@@ -14,7 +14,6 @@ import os.path
 import logging
 #from google import search
 import honeypotconfig
-import copyinfected
 import scan
 import executemechanize
 import extraction
@@ -41,17 +40,28 @@ def domaindownload():# this function downloads domain and website links from mul
 		os.system(command2)
 
 
+	if os.path.isfile(honeypotconfig.wdir+"list/list3.txt")==True:
+		print "Malicious website database 3 exists!\n"
+	else:
+		print "Fetching list 3"
+#		command3="wget http://www.montanamenagerie.org/hostsfile/hosts.txt -O "+honeypotconfig.wdir+"list/list3.txt"
+		command3="wget http://hosts-file.net/hphosts-partial.asp -O "+honeypotconfig.wdir+"list/list3.txt"
+		os.system(command3)
+
+
+	print "*****\nThis May Take a While\n"
+
 	mainfile=open(honeypotconfig.wdir+"list/malwebsites.txt", 'w')
 	file1=open(honeypotconfig.wdir+"list/list1.txt", 'r')
 	mainfile.write(file1.read())
 	file2=open(honeypotconfig.wdir+"list/list2.txt", 'r')
 	mainfile.write(file2.read())
-#	file3=open(honeypotconfig.wdir+"list/list3.txt", 'r')
-#	mainfile.write(file3.read())
+	file3=open(honeypotconfig.wdir+"list/list3.txt", 'r')
+	mainfile.write(file3.read())
 	mainfile.close()
 	file1.close()
 	file2.close()
-#	file3.close()
+	file3.close()
 
 
 
