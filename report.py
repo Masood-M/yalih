@@ -2,6 +2,8 @@ import honeypotconfig
 
 infected_files = dict()
 
+
+
 with open(honeypotconfig.wdir + "scanlogs/AVG-report.log") as f:
 	for line in f:
 		if line.startswith(honeypotconfig.wdir):

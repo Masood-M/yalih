@@ -53,3 +53,13 @@ def normalizeurl(url): ## this function normalizes the urls obtained from emails
 		pass
 	return url
 
+
+def normalizeurl2(url): ## this function normalizes the passed urls.
+	url = url.strip()
+	if not (url.startswith("http://")) and not (url.startswith("https://")): #if url does not start with http:// it adds it
+		url="http://"+url
+		pass
+	elif url.find('\\')!= -1:
+		url=url.replace('\\','')
+	return url
+

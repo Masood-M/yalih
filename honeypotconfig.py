@@ -32,10 +32,10 @@ referrer="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source="
 #====Bing Search
 starturl=20
 
-
-username="email username"
-password="email password"
-server="mail server"
+#If you are using a gmail account, "Allow Less Secure Apps" setting should be turned on in your account settings.
+username=""
+password=""
+server=""
 #server="imap.gmail.com"
 
 
@@ -56,7 +56,7 @@ jsbeautifier = False
 proxy={}
 
 #====The maximum size for executables that would be downloaded, in kb
-exe_max_size = 1800
+exe_max_size = 180
 
 #====HoneypotMonitor, in sec
 checkfrequency = 100

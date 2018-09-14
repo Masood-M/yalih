@@ -1,3 +1,15 @@
+rule myrule
+{
+        meta:
+                impact = 6
+        strings:
+                $body = "rapid" nocase
+        condition:
+                $body
+}
+
+
+
 rule SuspicousBodyOnload
 {
         meta:
@@ -7,6 +19,8 @@ rule SuspicousBodyOnload
         condition:
                 $body
 }
+
+
 
 rule PossibleShellcodePattern
 {

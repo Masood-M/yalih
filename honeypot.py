@@ -19,6 +19,7 @@ import updateantivirus
 import yaradetection
 import unquote
 import argparse
+import extraction
 
 try:
 	import signal
@@ -34,7 +35,8 @@ logger = logging.getLogger()
 def worker():
 
 	urldict = queue.get()	
-	logger.info(str(urldict["counter"]) + ",\t" + urldict["url"] + ",\t" + "Visiting")
+#this is for the normal visitor output (no error)
+	logger.info(str(urldict["counter"]) + ",\t" + urldict["url"]+",\t"+ "Visiting")
 	executemechanize.executemechanize(urldict)
 	queue.task_done()
 	
@@ -74,7 +76,6 @@ def main():
 	parser.add_argument("--local", nargs=1, help="scans a local file or directory for malicious signatures.", action="store")
 	parser.add_argument("--debug", help="Include http header", action="store_true")
 	parser.add_argument("--crawler", help="Crawl the sites and save any executables found", action="store_true")
-
 	if len(sys.argv) == 1:
 		parser.print_help()
 		sys.exit(1)
@@ -89,7 +90,7 @@ def main():
 		
 #Crawler
 	if args.crawler:
-		executemechanize.exe_crawler = True
+		executemechanize.crawler = True
 		
 #Logging
 	"""Initialize logger."""
@@ -144,20 +145,21 @@ def main():
 #Email
 	if args.email:
 		imapfile.imap()
-		extractlink.extracturl()#extracts urls from emails.txt file 
-		extractlink.duplicateremover() #removes the duplicate urls from crawler.txt files (which now contain extracted urls from emails.txt)
+		extraction.extracturl()#extracts urls from emails.txt file 
+		extraction.duplicateremover() #removes the duplicate urls from crawler.txt files (which now contain extracted urls from emails.txt)
+		os.remove("emails.txt")		
 		urls = open('crawler.txt', "r")
 		counter = 0
 		for line in urls:
 			dict={}
 			counter += 1
-			dict["url"] = line
+			dict["url"] = line.rstrip()
 			dict["counter"] = counter
 			queue.put(dict)
 		queue.join()
-#		scan.scanning(path)
-#		yaradetection.listandscan(path)
-#		unquote.unquoteDirectory(path)
+		scan.scanning(path)
+		yaradetection.listandscan(path)
+		unquote.unquoteDirectory(path)
 
 #File
 
@@ -177,9 +179,9 @@ def main():
 			queue.put(dict)
 		queue.join()
 		fopen3.close()
-#		scan.scanning(path)
-#		yaradetection.listandscan(path)
-#		unquote.unquoteDirectory(path)
+		scan.scanning(path)
+		yaradetection.listandscan(path)
+		unquote.unquoteDirectory(path)
 
 
 
@@ -196,9 +198,9 @@ def main():
 		queue.put(dict)
 		queue.join()
 #		executemechanize.executemechanize(url)
-#		scan.scanning(path)
-#		yaradetection.listandscan(path)
-#		unquote.unquoteDirectory(path)
+		scan.scanning(path)
+		yaradetection.listandscan(path)
+		unquote.unquoteDirectory(path)
 
 
 #Search
@@ -228,7 +230,6 @@ def main():
 
 
 
-
 #Local Scan
 	if args.local:
 		path = sys.argv[2]
@@ -239,10 +240,7 @@ def main():
 
 
 class SpecialFormatter(logging.Formatter):
-
-	FORMATS = {logging.ERROR : "%(asctime)s,\t%(name)s,\t%(levelname)s,\t%(error_code)s,\t%(message)s",
-			   'DEFAULT' :  "%(asctime)s,\t%(name)s,\t%(levelname)s,\t,\t%(message)s"}
-			   
+	FORMATS = {logging.INFO : "%(name)s,\t%(levelname)s,\t%(message)s", 'DEFAULT' :  "%(name)s,\t%(levelname)s,\t%(message)s"}	   
 	def formatTime(self, record, datefmt=None):
 		self._datefmt = time.strftime("%Y-%m-%d %H:%M:%S")
 		return logging.Formatter.formatTime(self, record, self._datefmt)

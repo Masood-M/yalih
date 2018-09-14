@@ -9,13 +9,16 @@ COPYING.txt included with the distribution).
 
 """
 
-import os, re
-from types import StringType
-from types import UnicodeType
-STRING_TYPES = StringType, UnicodeType
+from __future__ import absolute_import
 
-from _util import http2time
-import _rfc3986
+import os
+import re
+from types import StringType, UnicodeType
+
+from . import _rfc3986
+from ._util import http2time
+
+STRING_TYPES = StringType, UnicodeType
 
 
 def is_html_file_extension(url, allow_xhtml):
@@ -43,21 +46,26 @@ def is_html(ct_headers, url, allow_xhtml=False):
     html_types = ["text/html"]
     if allow_xhtml:
         html_types += [
-            "text/xhtml", "text/xml",
-            "application/xml", "application/xhtml+xml",
-            ]
+            "text/xhtml",
+            "text/xml",
+            "application/xml",
+            "application/xhtml+xml",
+        ]
     return ct in html_types
 
 
 def unmatched(match):
     """Return unmatched part of re.Match object."""
     start, end = match.span(0)
-    return match.string[:start]+match.string[end:]
+    return match.string[:start] + match.string[end:]
 
-token_re =        re.compile(r"^\s*([^=\s;,]+)")
+
+token_re = re.compile(r"^\s*([^=\s;,]+)")
 quoted_value_re = re.compile(r"^\s*=\s*\"([^\"\\]*(?:\\.[^\"\\]*)*)\"")
-value_re =        re.compile(r"^\s*=\s*([^\s;,]*)")
+value_re = re.compile(r"^\s*=\s*([^\s;,]*)")
 escape_re = re.compile(r"\\(.)")
+
+
 def split_header_words(header_values):
     r"""Parse header values into a list of lists containing key,value pairs.
 
@@ -131,7 +139,8 @@ def split_header_words(header_values):
             elif text.lstrip().startswith(","):
                 # concatenated headers, as per RFC 2616 section 4.2
                 text = text.lstrip()[1:]
-                if pairs: result.append(pairs)
+                if pairs:
+                    result.append(pairs)
                 pairs = []
             else:
                 # skip junk
@@ -140,10 +149,14 @@ def split_header_words(header_values):
                     "split_header_words bug: '%s', '%s', %s" %
                     (orig_text, text, pairs))
                 text = non_junk
-        if pairs: result.append(pairs)
+        if pairs:
+            result.append(pairs)
     return result
 
+
 join_escape_re = re.compile(r"([\"\\])")
+
+
 def join_header_words(lists):
     """Do the inverse of the conversion done by split_header_words.
 
@@ -169,8 +182,10 @@ def join_header_words(lists):
                 else:
                     k = "%s=%s" % (k, v)
             attr.append(k)
-        if attr: headers.append("; ".join(attr))
+        if attr:
+            headers.append("; ".join(attr))
     return ", ".join(headers)
+
 
 def strip_quotes(text):
     if text.startswith('"'):
@@ -178,6 +193,7 @@ def strip_quotes(text):
     if text.endswith('"'):
         text = text[:-1]
     return text
+
 
 def parse_ns_headers(ns_headers):
     """Ad-hoc parser for Netscape protocol cookie-attributes.
@@ -194,9 +210,15 @@ def parse_ns_headers(ns_headers):
     Currently, this is also used for parsing RFC 2109 cookies.
 
     """
-    known_attrs = ("expires", "domain", "path", "secure",
-                   # RFC 2109 attrs (may turn up in Netscape cookies, too)
-                   "version", "port", "max-age")
+    known_attrs = (
+        "expires",
+        "domain",
+        "path",
+        "secure",
+        # RFC 2109 attrs (may turn up in Netscape cookies, too)
+        "version",
+        "port",
+        "max-age")
 
     result = []
     for ns_header in ns_headers:
@@ -206,7 +228,8 @@ def parse_ns_headers(ns_headers):
         for ii in range(len(params)):
             param = params[ii]
             param = param.rstrip()
-            if param == "": continue
+            if param == "":
+                continue
             if "=" not in param:
                 k, v = param, None
             else:
@@ -233,9 +256,24 @@ def parse_ns_headers(ns_headers):
     return result
 
 
+uppercase_headers = {'WWW', 'TE'}
+
+
+def normalize_header_name(name):
+    parts = [x.capitalize() for x in name.split('-')]
+    q = parts[0].upper()
+    if q in uppercase_headers:
+        parts[0] = q
+    if len(parts) == 3 and parts[1] == 'Websocket':
+        parts[1] = 'WebSocket'
+    return '-'.join(parts)
+
+
 def _test():
-   import doctest, _headersutil
-   return doctest.testmod(_headersutil)
+    import doctest
+    from . import _headersutil
+    return doctest.testmod(_headersutil)
+
 
 if __name__ == "__main__":
-   _test()
+    _test()

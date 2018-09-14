@@ -60,16 +60,9 @@ glibc.i686
 
 yara requires:
 
-#apt-get install g++
-#apt-get install autoconf
-#apt-get install automake
-#apt-get install libtool
-#apt-get install python-dev
-#apt-get install libpcre3-dev
-#apt-get install libpcre3
-#apt-get install flex
-#apt-get install bison
+#apt-get install g++ autoconf automake libtool python-dev libpcre3-dev libpcre3 flex bison
 #pip install psutil
+
 #pip install tldextract
 
 

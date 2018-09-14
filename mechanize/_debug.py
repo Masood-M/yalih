@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+
 import logging
 
-from _response import response_seek_wrapper
-from _urllib2_fork import BaseHandler
+from ._response import response_seek_wrapper
+from ._urllib2_fork import BaseHandler
 
 
 class HTTPResponseDebugProcessor(BaseHandler):
@@ -10,9 +12,9 @@ class HTTPResponseDebugProcessor(BaseHandler):
     def http_response(self, request, response):
         if not hasattr(response, "seek"):
             response = response_seek_wrapper(response)
-        info = logging.getLogger("mechanize.http_headers").debug
+        info = logging.getLogger("mechanize.http_responses").info
         try:
-            info(response.info())
+            info(response.read())
         finally:
             response.seek(0)
         info("*****************************************************")
@@ -20,11 +22,12 @@ class HTTPResponseDebugProcessor(BaseHandler):
 
     https_response = http_response
 
-class HTTPRedirectDebugProcessor(BaseHandler):
-    def http_request(self, request):
 
+class HTTPRedirectDebugProcessor(BaseHandler):
+
+    def http_request(self, request):
         if hasattr(request, "redirect_dict"):
-            info = logging.getLogger("mechanize.http_redirects").debug
-            info("[%s] is fetching %s", request.get_origin_req_host(), request.get_full_url())
-            
+            info = logging.getLogger("mechanize.http_redirects").info
+            info("redirecting from %s to %s", request.get_origin_req_host(), request.get_full_url())
+
         return request

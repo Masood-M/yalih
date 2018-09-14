@@ -7,27 +7,48 @@ under the terms of the BSD or ZPL 2.1 licenses (see the file
 COPYING.txt included with the distribution).
 """
 
+from __future__ import absolute_import
+
 import re
 import time
 import warnings
+from calendar import timegm
 
 
 class ExperimentalWarning(UserWarning):
     pass
 
+
 def experimental(message):
     warnings.warn(message, ExperimentalWarning, stacklevel=3)
+
+
 def hide_experimental_warnings():
     warnings.filterwarnings("ignore", category=ExperimentalWarning)
+
+
 def reset_experimental_warnings():
     warnings.filterwarnings("default", category=ExperimentalWarning)
 
+
 def deprecation(message):
     warnings.warn(message, DeprecationWarning, stacklevel=3)
+
+
 def hide_deprecations():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+
 def reset_deprecations():
     warnings.filterwarnings("default", category=DeprecationWarning)
+
+
+def read_file(filename):
+    fh = open(filename)
+    try:
+        return fh.read()
+    finally:
+        fh.close()
 
 
 def write_file(filename, data):
@@ -44,27 +65,31 @@ def get1(sequence):
 
 
 def isstringlike(x):
-    try: x+""
-    except: return False
-    else: return True
+    try:
+        x + ""
+    except:
+        return False
+    else:
+        return True
 
-## def caller():
-##     try:
+# def caller():
+# try:
 ##         raise SyntaxError
-##     except:
+# except:
 ##         import sys
-##     return sys.exc_traceback.tb_frame.f_back.f_back.f_code.co_name
+# return sys.exc_traceback.tb_frame.f_back.f_back.f_code.co_name
 
 
-from calendar import timegm
 
 # Date/time conversion routines for formats used by the HTTP protocol.
 
 EPOCH = 1970
+
+
 def my_timegm(tt):
     year, month, mday, hour, min, sec = tt[:6]
     if ((year >= EPOCH) and (1 <= month <= 12) and (1 <= mday <= 31) and
-        (0 <= hour <= 24) and (0 <= min <= 59) and (0 <= sec <= 61)):
+            (0 <= hour <= 24) and (0 <= min <= 59) and (0 <= sec <= 61)):
         return timegm(tt)
     else:
         return None
@@ -73,7 +98,8 @@ days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 months_lower = []
-for month in months: months_lower.append(month.lower())
+for month in months:
+    months_lower.append(month.lower())
 
 
 def time2isoz(t=None):
@@ -88,10 +114,12 @@ def time2isoz(t=None):
     1994-11-24 08:49:37Z
 
     """
-    if t is None: t = time.time()
+    if t is None:
+        t = time.time()
     year, mon, mday, hour, min, sec = time.gmtime(t)[:6]
     return "%04d-%02d-%02d %02d:%02d:%02dZ" % (
         year, mon, mday, hour, min, sec)
+
 
 def time2netscape(t=None):
     """Return a string representing time in seconds since epoch, t.
@@ -104,18 +132,21 @@ def time2netscape(t=None):
     Wed, DD-Mon-YYYY HH:MM:SS GMT
 
     """
-    if t is None: t = time.time()
+    if t is None:
+        t = time.time()
     year, mon, mday, hour, min, sec, wday = time.gmtime(t)[:7]
     return "%s %02d-%s-%04d %02d:%02d:%02d GMT" % (
-        days[wday], mday, months[mon-1], year, hour, min, sec)
+        days[wday], mday, months[mon - 1], year, hour, min, sec)
 
 
 UTC_ZONES = {"GMT": None, "UTC": None, "UT": None, "Z": None}
 
 timezone_re = re.compile(r"^([-+])?(\d\d?):?(\d\d)?$")
+
+
 def offset_from_tz_string(tz):
     offset = None
-    if UTC_ZONES.has_key(tz):
+    if tz in UTC_ZONES:
         offset = 0
     else:
         m = timezone_re.search(tz)
@@ -127,11 +158,12 @@ def offset_from_tz_string(tz):
                 offset = -offset
     return offset
 
+
 def _str2time(day, mon, yr, hr, min, sec, tz):
     # translate month name to number
     # month numbers start with 1 (January)
     try:
-        mon = months_lower.index(mon.lower())+1
+        mon = months_lower.index(mon.lower()) + 1
     except ValueError:
         # maybe it's already a number
         try:
@@ -144,9 +176,12 @@ def _str2time(day, mon, yr, hr, min, sec, tz):
             return None
 
     # make sure clock elements are defined
-    if hr is None: hr = 0
-    if min is None: min = 0
-    if sec is None: sec = 0
+    if hr is None:
+        hr = 0
+    if min is None:
+        min = 0
+    if sec is None:
+        sec = 0
 
     yr = int(yr)
     day = int(day)
@@ -162,8 +197,10 @@ def _str2time(day, mon, yr, hr, min, sec, tz):
         yr = yr + cur_yr - m
         m = m - tmp
         if abs(m) > 50:
-            if m > 0: yr = yr + 100
-            else: yr = yr - 100
+            if m > 0:
+                yr = yr + 100
+            else:
+                yr = yr - 100
 
     # convert UTC time tuple to seconds since epoch (not timezone-adjusted)
     t = my_timegm((yr, mon, day, hr, min, sec, tz))
@@ -202,6 +239,8 @@ loose_http_re = re.compile(
        \s*
     (?:\(\w+\))?       # ASCII representation of timezone in parens.
        \s*$""", re.X)
+
+
 def http2time(text):
     """Returns time in seconds since epoch of time represented by a string.
 
@@ -247,7 +286,7 @@ def http2time(text):
     text = wkday_re.sub("", text, 1)  # Useless weekday
 
     # tz is time zone specifier string
-    day, mon, yr, hr, min, sec, tz = [None]*7
+    day, mon, yr, hr, min, sec, tz = [None] * 7
 
     # loose regexp parse
     m = loose_http_re.search(text)
@@ -275,6 +314,8 @@ iso_re = re.compile(
    ([-+]?\d\d?:?(:?\d\d)?
     |Z|z)?               # timezone  (Z is "zero meridian", i.e. GMT)
       \s*$""", re.X)
+
+
 def iso2time(text):
     """
     As for http2time, but parses the ISO 8601 formats:
@@ -291,7 +332,7 @@ def iso2time(text):
     text = text.lstrip()
 
     # tz is time zone specifier string
-    day, mon, yr, hr, min, sec, tz = [None]*7
+    day, mon, yr, hr, min, sec, tz = [None] * 7
 
     # loose regexp parse
     m = iso_re.search(text)

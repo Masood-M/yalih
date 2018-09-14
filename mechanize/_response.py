@@ -16,8 +16,14 @@ included with the distribution).
 
 """
 
-import copy, mimetools, urllib2
-from cStringIO import StringIO
+from __future__ import absolute_import
+from functools import partial
+import copy
+import mimetools
+from io import BytesIO
+
+from ._headersutil import normalize_header_name
+from .polyglot import HTTPError
 
 
 def len_of_seekable(file_):
@@ -36,13 +42,14 @@ def len_of_seekable(file_):
 # instead, but I think he's released his code publicly since, could pinch the
 # tests from it, at least...
 
+
 # For testing seek_wrapper invariant (note that
 # test_urllib2.HandlerTest.test_seekable is expected to fail when this
 # invariant checking is turned on).  The invariant checking is done by module
 # ipdc, which is available here:
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/436834
-## from ipdbc import ContractBase
-## class seek_wrapper(ContractBase):
+# from ipdbc import ContractBase
+# class seek_wrapper(ContractBase):
 class seek_wrapper:
     """Adds a seek method to a file object.
 
@@ -64,8 +71,9 @@ class seek_wrapper:
     particular file object.
 
     """
+
     # General strategy is to check that cache is full enough, then delegate to
-    # the cache (self.__cache, which is a cStringIO.StringIO instance).  A seek
+    # the cache (self.__cache, which is a BytesIO instance).  A seek
     # position (self.__pos) is maintained independently of the cache, in order
     # that a single cache may be shared between multiple seek_wrapper objects.
     # Copying using module copy shares the cache in this way.
@@ -75,7 +83,7 @@ class seek_wrapper:
         self.__read_complete_state = [False]
         self.__is_closed_state = [False]
         self.__have_readline = hasattr(self.wrapped, "readline")
-        self.__cache = StringIO()
+        self.__cache = BytesIO()
         self.__pos = 0  # seek position
 
     def invariant(self):
@@ -110,17 +118,19 @@ class seek_wrapper:
             self.__dict__[name] = value
 
     def seek(self, offset, whence=0):
-        assert whence in [0,1,2]
+        assert whence in [0, 1, 2]
 
         # how much data, if any, do we need to read?
         if whence == 2:  # 2: relative to end of *wrapped* file
-            if offset < 0: raise ValueError("negative seek offset")
+            if offset < 0:
+                raise ValueError("negative seek offset")
             # since we don't know yet where the end of that file is, we must
             # read everything
             to_read = None
         else:
             if whence == 0:  # 0: absolute
-                if offset < 0: raise ValueError("negative seek offset")
+                if offset < 0:
+                    raise ValueError("negative seek offset")
                 dest = offset
             else:  # 1: relative to current position
                 pos = self.__pos
@@ -149,7 +159,7 @@ class seek_wrapper:
                 # of .wrapped, since fseek() doesn't complain in that case.
                 # Also like fseek(), pretend we have seek()ed past the end,
                 # i.e. not:
-                #self.__pos = self.__cache.tell()
+                # self.__pos = self.__cache.tell()
                 # but rather:
                 self.__pos = dest
         else:
@@ -181,7 +191,7 @@ class seek_wrapper:
         # enough data already cached?
         if size <= available and size != -1:
             self.__cache.seek(pos)
-            self.__pos = pos+size
+            self.__pos = pos + size
             return self.__cache.read(size)
 
         # no, so read sufficient data from wrapped file and cache it
@@ -222,10 +232,10 @@ class seek_wrapper:
         data = self.__cache.readline()
         if size != -1:
             r = data[:size]
-            self.__pos = pos+size
+            self.__pos = pos + size
         else:
             r = data
-            self.__pos = pos+len(data)
+            self.__pos = pos + len(data)
         return r
 
     def readlines(self, sizehint=-1):
@@ -238,11 +248,15 @@ class seek_wrapper:
         self.__pos = self.__cache.tell()
         return data
 
-    def __iter__(self): return self
-    def next(self):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
         line = self.readline()
-        if line == "": raise StopIteration
+        if line == "":
+            raise StopIteration
         return line
+    next = __next__
 
     xreadlines = __iter__
 
@@ -252,7 +266,6 @@ class seek_wrapper:
 
 
 class response_seek_wrapper(seek_wrapper):
-
     """
     Supports copying response objects and setting response body data.
 
@@ -284,18 +297,30 @@ class response_seek_wrapper(seek_wrapper):
         self.seek(0)
         self.read()
         self.close()
-        cache = self._seek_wrapper__cache = StringIO()
+        cache = self._seek_wrapper__cache = BytesIO()
         cache.write(data)
         self.seek(0)
 
 
 class eoffile:
     # file-like object that always claims to be at end-of-file...
-    def read(self, size=-1): return ""
-    def readline(self, size=-1): return ""
-    def __iter__(self): return self
-    def next(self): return ""
-    def close(self): pass
+
+    def read(self, size=-1):
+        return ""
+
+    def readline(self, size=-1):
+        return ""
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return ""
+    next = __next__
+
+    def close(self):
+        pass
+
 
 class eofresponse(eoffile):
     def __init__(self, url, headers, code, msg):
@@ -303,8 +328,12 @@ class eofresponse(eoffile):
         self._headers = headers
         self.code = code
         self.msg = msg
-    def geturl(self): return self._url
-    def info(self): return self._headers
+
+    def geturl(self):
+        return self._url
+
+    def info(self):
+        return self._headers
 
 
 class closeable_response:
@@ -326,6 +355,7 @@ class closeable_response:
 
     .code
     .msg
+    .http_version
 
     Also supports pickling (but the stdlib currently does something to prevent
     it: http://python.org/sf/1144636).
@@ -334,31 +364,54 @@ class closeable_response:
     # presence of this attr indicates is useable after .close()
     closeable_response = None
 
-    def __init__(self, fp, headers, url, code, msg):
+    def __init__(self, fp, headers, url, code, msg, http_version=None):
         self._set_fp(fp)
         self._headers = headers
         self._url = url
         self.code = code
         self.msg = msg
+        self.http_version = http_version
 
     def _set_fp(self, fp):
         self.fp = fp
         self.read = self.fp.read
         self.readline = self.fp.readline
-        if hasattr(self.fp, "readlines"): self.readlines = self.fp.readlines
+        if hasattr(self.fp, "readlines"):
+            self.readlines = self.fp.readlines
         if hasattr(self.fp, "fileno"):
             self.fileno = self.fp.fileno
         else:
             self.fileno = lambda: None
         self.__iter__ = self.fp.__iter__
-        self.next = self.fp.next
+        self.next = partial(next, self.fp)
 
     def __repr__(self):
-        return '<%s at %s whose fp = %r>' % (
-            self.__class__.__name__, hex(abs(id(self))), self.fp)
+        return '<%s at %s whose fp = %r>' % (self.__class__.__name__,
+                                             hex(abs(id(self))), self.fp)
 
     def info(self):
         return self._headers
+
+    def getcode(self):
+        return self.code
+
+    def get_header_values(self, name):
+        return self._headers.getheaders(name)
+
+    def get_all_header_names(self, normalize=True):
+        ans = []
+        for line in self._headers.headers:
+            h = line.partition(':')[0]
+            if normalize:
+                h = normalize_header_name(h)
+            ans.append(h)
+        return ans
+
+    def __getitem__(self, name):
+        return self._headers[name]
+
+    def get(self, name, default):
+        return self._headers.get(name)
 
     def geturl(self):
         return self._url
@@ -366,8 +419,8 @@ class closeable_response:
     def close(self):
         wrapped = self.fp
         wrapped.close()
-        new_wrapped = eofresponse(
-            self._url, self._headers, self.code, self.msg)
+        new_wrapped = eofresponse(self._url, self._headers, self.code,
+                                  self.msg)
         self._set_fp(new_wrapped)
 
     def __getstate__(self):
@@ -387,19 +440,28 @@ class closeable_response:
         # So we do 1.
 
         state = self.__dict__.copy()
-        new_wrapped = eofresponse(
-            self._url, self._headers, self.code, self.msg)
+        new_wrapped = eofresponse(self._url, self._headers, self.code,
+                                  self.msg)
         state["wrapped"] = new_wrapped
         return state
 
-def test_response(data='test data', headers=[],
-                  url="http://example.com/", code=200, msg="OK"):
+
+def test_response(data='test data',
+                  headers=[],
+                  url="http://example.com/",
+                  code=200,
+                  msg="OK"):
     return make_response(data, headers, url, code, msg)
 
-def test_html_response(data='test data', headers=[],
-                       url="http://example.com/", code=200, msg="OK"):
+
+def test_html_response(data='test data',
+                       headers=[],
+                       url="http://example.com/",
+                       code=200,
+                       msg="OK"):
     headers += [("Content-type", "text/html")]
     return make_response(data, headers, url, code, msg)
+
 
 def make_response(data, headers, url, code, msg):
     """Convenient factory for objects implementing response interface.
@@ -412,7 +474,7 @@ def make_response(data, headers, url, code, msg):
 
     """
     mime_headers = make_headers(headers)
-    r = closeable_response(StringIO(data), mime_headers, url, code, msg)
+    r = closeable_response(BytesIO(data), mime_headers, url, code, msg)
     return response_seek_wrapper(r)
 
 
@@ -423,24 +485,26 @@ def make_headers(headers):
     hdr_text = []
     for name_value in headers:
         hdr_text.append("%s: %s" % name_value)
-    return mimetools.Message(StringIO("\n".join(hdr_text)))
+    return mimetools.Message(BytesIO("\n".join(hdr_text)))
 
 
 # Rest of this module is especially horrible, but needed, at least until fork
 # urllib2.  Even then, may want to preseve urllib2 compatibility.
 
+
 def get_seek_wrapper_class(response):
     # in order to wrap response objects that are also exceptions, we must
     # dynamically subclass the exception :-(((
-    if (isinstance(response, urllib2.HTTPError) and
-        not hasattr(response, "seek")):
+    if (isinstance(response, HTTPError) and
+            not hasattr(response, "seek")):
         if response.__class__.__module__ == "__builtin__":
             exc_class_name = response.__class__.__name__
         else:
-            exc_class_name = "%s.%s" % (
-                response.__class__.__module__, response.__class__.__name__)
+            exc_class_name = "%s.%s" % (response.__class__.__module__,
+                                        response.__class__.__name__)
 
-        class httperror_seek_wrapper(response_seek_wrapper, response.__class__):
+        class httperror_seek_wrapper(response_seek_wrapper,
+                                     response.__class__):
             # this only derives from HTTPError in order to be a subclass --
             # the HTTPError behaviour comes from delegation
 
@@ -453,16 +517,16 @@ def get_seek_wrapper_class(response):
                 self.filename = wrapped.geturl()
 
             def __repr__(self):
-                return (
-                    "<%s (%s instance) at %s "
-                    "whose wrapped object = %r>" % (
-                    self.__class__.__name__, self._exc_class_name,
-                    hex(abs(id(self))), self.wrapped)
-                    )
+                return ("<%s (%s instance) at %s "
+                        "whose wrapped object = %r>" %
+                        (self.__class__.__name__, self._exc_class_name,
+                         hex(abs(id(self))), self.wrapped))
+
         wrapper_class = httperror_seek_wrapper
     else:
         wrapper_class = response_seek_wrapper
     return wrapper_class
+
 
 def seek_wrapped_response(response):
     """Return a copy of response that supports seekable response interface.
@@ -478,6 +542,7 @@ def seek_wrapped_response(response):
         response = wrapper_class(response)
     assert hasattr(response, "get_data")
     return response
+
 
 def upgrade_response(response):
     """Return a copy of response that supports Browser response interface.
@@ -517,8 +582,9 @@ def upgrade_response(response):
     if get_data:
         data = get_data()
 
-    response = closeable_response(
-        response.fp, response.info(), response.geturl(), code, msg)
+    response = closeable_response(response.fp,
+                                  response.info(), response.geturl(), code,
+                                  msg)
     response = wrapper_class(response)
     if data:
         response.set_data(data)

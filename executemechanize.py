@@ -3,15 +3,26 @@
 import honeypotconfig
 import re
 import os, errno, logging
-import threading
+import threading, normalize
 import mechanize
 import cookielib
 import urlparse, urllib, urllib2
 import lxml.html
 import magic, mimetypes
 import jsbeautifier
-import tldextract
+import tldextract, httplib
+import extraction
 
+import socket
+class MyHTTPConnection (httplib.HTTPConnection):
+    def connect (self):
+        if self.host == 'www.porn.com':
+            self.host = '208.67.222.123' #OpenDNS FamilyShield
+            self.port = 53
+        self.sock = socket.create_connection ((self.host, self.port))
+class MyHTTPHandler (urllib2.HTTPHandler):
+    def http_open (self, req):
+        return self.do_open (MyHTTPConnection, req)
 
 try:
     import signal
@@ -23,7 +34,7 @@ except ImportError:
 logger = logging.getLogger("mechanize")
 logger.setLevel(logging.INFO)
 threadlocal = threading.local()
-exe_crawler = False
+crawler = False
 opts = jsbeautifier.default_options()
 opts.eval_code = True
 
@@ -46,80 +57,6 @@ def create_directory(directory_name):
 			raise
 
 
-def exe_extraction(url_list):
-	exe_list = []
-	exe_regex = re.compile("\.(exe|msi|scr)$")
-	for link in url_list:
-		if exe_regex.search(link.strip()):
-			exe_list.append(link)
-	return exe_list
-
-
-def js_extraction(response, scheme, host):
-
-# JS extraction approach 1
-	jsurl_list_old = []	# Array of link to js as is in html file
-	jsurl_list = list()	# Array of link to js after getting fully qualified domain name
-
-	url_list = re.findall(r'http[s]?://[^\s<>"]+|www\.[^\s<>"]+', response)
-	js_regex = re.compile("\.js(\?)?.*$")
-
-	for link in url_list:
-		link = link.strip()
-		if js_regex.search(link) and link not in jsurl_list:
-			jsurl_list_old.append(link)
-			link = link.replace("amp;", "") # remove amp; from urls
-			link = re.split("['\"]", link)[0] # remove unnecessary quotes from url
-			jsurl_list.append(link)
-
-
-# JS extraction approach 2
-	doc = lxml.html.document_fromstring(response)
-	script_list = doc.xpath('//script/@src')
-
-	for link in script_list:
-		if not js_regex.search(link):
-			continue
-
-		elif link.startswith("//"):
-			jsurl_list_old.append(link)
-			link = scheme + ":" + link
-			jsurl_list.append(link)
-
-		elif link.startswith("/"):
-			jsurl_list_old.append(link)
-			link = scheme + "://" + host + link
-			jsurl_list.append(link)
-
-		elif link.startswith("www."):
-			jsurl_list_old.append(link)
-			link = "http://" + link
-			jsurl_list.append(link)
-
-		elif link.lower().startswith(("js/", "catalog/", "script/", "scripts/", "katalog/","template/","templates/","includes/","static/","mod/","files/","data/","css/","components/","component/","sites/","default/")):
-			jsurl_list_old.append(link)
-			link = scheme + "://" + host + "/" + link
-			jsurl_list.append(link)
-
-		elif link.startswith("./") or link.startswith("../"):
-			jsurl_list_old.append(link)
-			link = re.sub(r"^[\./|\.\./]", "", link)
-			link = scheme + "://" + host + link
-			jsurl_list.append(link)
-
-		elif not link.lower().startswith(("//","/","www.","http://","https://","./","../")):
-			jsurl_list_old.append(link)
-			link = scheme + "://" + host + "/" + link
-			jsurl_list.append(link)
-
-		else:
-			jsurl_list_old.append(link)
-			jsurl_list.append(link)
-			
-	del doc
-	del script_list 
-	return jsurl_list_old, jsurl_list, url_list
-
 
 def executemechanize(urldict):
 	
@@ -138,7 +75,7 @@ def executemechanize(urldict):
 	br.set_handle_redirect(True)
 	br.set_handle_referer(False)
 	br.set_handle_robots(False)
-	br.set_debug_responses(True)
+	br.set_debug_responses(False)
 	br.set_debug_redirects(True)
 	br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=0)		
 	br.set_proxies(honeypotconfig.proxy)
@@ -167,24 +104,24 @@ def executemechanize(urldict):
 		# Extract and format URL
 		extracted = tldextract.extract(url)
 #		print extracted
-		#formatted = "{}.{}".format(extracted.domain, extracted.tld)
-		formatted = "{}.{}.{}".format(extracted.subdomain, extracted.domain, extracted.tld)
-		print formatted
+		#formatted = "{}.{}".format(extracted.domain, extracted.suffix)
+		formatted = "{}.{}.{}".format(extracted.subdomain, extracted.domain, extracted.suffix)
+#		print formatted
 		
 		# Extract each link in the redirection list and match it aginst the formatted URL
 		for eachredirect in threadlocal.redirection_list:
 			list_extract = tldextract.extract(eachredirect)
-			list_format = "{}.{}.{}".format(list_extract.subdomain, list_extract.domain, list_extract.tld)
+			list_format = "{}.{}.{}".format(list_extract.subdomain, list_extract.domain, list_extract.suffix)
 #			print list_format
 			if list_format == formatted:
 				pass
 			if not list_format == formatted:
 				if threadlocal.redirection_list:
-					logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
+					logger.info(str(url_no) + ",\t" + url + ",\t" + '"'+"Redirection Route" + '"'+ ",\t" +str(threadlocal.redirection_list))
 					break
 		
-		#if threadlocal.redirection_list:
-			#logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
+		if threadlocal.redirection_list:
+			logger.info(str(url_no) + ",\t" + url + ",\t" + "Redirection Route" + ",\t" +str(threadlocal.redirection_list))
 		
 		# Convert url into valid file name
 		fdirname = urllib.quote_plus(url)
@@ -207,7 +144,7 @@ def executemechanize(urldict):
  		create_directory(directory_name)
 
 		# Fetch array of javascript url
-		jsurl_list_old, jsurl_list, url_list = js_extraction(br.response().read(), scheme, host)
+		jsurl_list_old, jsurl_list, url_list = extraction.js_extraction(br.response().read(), scheme, host)
 
 		# Remove duplicates
 		jsurl_list_unique = set(jsurl_list)
@@ -234,15 +171,19 @@ def executemechanize(urldict):
 			os.rename((os.path.join(directory_name, fdirname)), (os.path.join(directory_name, fdirname)) + str(guess_ext))
 							
 #Fetching .js Files
-		
+			
 		if len(jsurl_list_unique) != 0:
 			create_directory(os.path.join(directory_name,  "javascripts"))
 		
 				
 		for link in jsurl_list_unique:
+			link=normalize.normalizeurl2(link)
+			if len(link)>250:
+				continue
+#			print link
 			try:			
-				r = br.open(link, timeout=12.0)
-				logger.info(str(url_no) + ",\t" + url + ",\tJS retrieve,\t" + link)	
+				r = br.open(normalize.normalizeurl2(link), timeout=12.0)
+				logger.debug(str(url_no) + ",\t" + url + ",\tJS retrieve,\t" + link)	
 				js_name = link[link.rfind("/") + 1:]
 				response = br.response().read()
 
@@ -267,26 +208,29 @@ def executemechanize(urldict):
 				jswrite.close()
 
 			except Exception, e:
-				try:	
-					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : str(e.code)})
-				except AttributeError:
-					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : ""})
+				logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + '"'+ str(e) + '"'+",\t" + link)
+
+
+
+			r.close()
+				
+
 
 		jsurl_list_unique.clear()
 
 		# Check for executable files and saves them
 		exe_list = []
 
-		if exe_crawler:
-			exe_list = exe_extraction(url_list)
+		if crawler:
+			exe_list = extraction.exe_extraction(url_list)
 
 		if len(exe_list) != 0:
 			create_directory(os.path.join(directory_name,  "exe"))
-			
+
 		for link in exe_list:
 			try:
-				# Read header to check for exe size
-				# Only downloads if less than a threshold (set in honeypotconfig)
+                    # Read header to check for exe size
+                # Only downloads if less than a threshold (set in honeypotconfig)
 				r = urllib2.urlopen(link, timeout=12)
 				size = int(r.headers["Content-Length"]) / 1024
 				exename = link[link.rfind("/") + 1:]
@@ -295,14 +239,16 @@ def executemechanize(urldict):
 					exe_file_path = os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder, first_char, second_char, fdirname, "exe", exename)
 					if honeypotconfig.proxy:
 						proxyname = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
-						exe_file_path = os.path.join(honeypotconfig.wdir, proxyname, first_char, second_char, fdirname, "exe", js_name)									
-					exewrite = open(exe_file_path, 'w')
+						exe_file_path = os.path.join(honeypotconfig.wdir, proxyname, first_char, second_char, fdirname, "exe", js_name)
+					r.close()
+					r2=br.open(link, timeout=12)
+					exewrite = open(exe_file_path, 'wb')
 					exewrite.write(br.response().read())
 					exewrite.close()
 				else:
-					logger.info(str(url_no) + ",\t" + url + ",\t" + "EXE " + str(size) + "KB above exe_max_size" + ",\t" + link)	
+					logger.error(str(url_no) + ",\t" + url + ",\t" + "EXE " + str(size) + "KB above exe_max_size" + ",\t" + link)
 			except Exception, e:
-				try:	
+				try:
 					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : str(e.code)})
 				except AttributeError:
 					logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + str(e) + ",\t" + link,  extra = {'error_code' : ""})
@@ -310,11 +256,7 @@ def executemechanize(urldict):
 		del exe_list[:]
 		del url_list[:]
 
-	except Exception, e:
-		try:
-			logger.error(str(url_no) + ",\t" + url.strip() + "\tpoop" + ",\t" + str(e), extra = {'error_code' : str(e.code)})
-		except AttributeError:
-			if "Errno" in str(e.reason):
-				logger.error(str(url_no) + ",\t" + url.strip() + "\tpoop" +",\t" + "Error 418: I'm a teapot", extra = {'error_code' : ""})
-			else:
-				logger.error(str(url_no) + ",\t" + url.strip() + "\tpoop" +",\t" + str(e), extra = {'error_code' : ""})
+
+
+	except Exception, e:   #this is for normal errors (No .js)
+		logger.error(str(url_no) + ",\t" + url.strip() + ",\t" + '"'+str(e)+'"' + "\t")	
