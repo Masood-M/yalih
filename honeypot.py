@@ -159,11 +159,7 @@ def main():
 		queue.join()
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-<<<<<<< HEAD
 		unquote.unquoteDirectory(path)
-=======
-#		unquote.unquoteDirectory(path)
->>>>>>> a33dad0322ada258045b4c99d3dd71d457bca672
 
 #File
 
@@ -185,11 +181,7 @@ def main():
 		fopen3.close()
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-<<<<<<< HEAD
 		unquote.unquoteDirectory(path)
-=======
-#		unquote.unquoteDirectory(path)
->>>>>>> a33dad0322ada258045b4c99d3dd71d457bca672
 
 
 
@@ -208,11 +200,7 @@ def main():
 #		executemechanize.executemechanize(url)
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-<<<<<<< HEAD
 		unquote.unquoteDirectory(path)
-=======
-#		unquote.unquoteDirectory(path)
->>>>>>> a33dad0322ada258045b4c99d3dd71d457bca672
 
 
 #Search
@@ -238,7 +226,7 @@ def main():
 
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-#		unquote.unquoteDirectory(path)
+		unquote.unquoteDirectory(path)
 
 
 
@@ -247,7 +235,7 @@ def main():
 		path = sys.argv[2]
 		scan.scanning(path)
 		yaradetection.listandscan(path)
-#		unquote.unquoteDirectory(path)
+		unquote.unquoteDirectory(path)
 
 
 
