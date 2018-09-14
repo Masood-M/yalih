@@ -13,17 +13,6 @@ import jsbeautifier
 import tldextract, httplib
 import extraction
 
-import socket
-class MyHTTPConnection (httplib.HTTPConnection):
-    def connect (self):
-        if self.host == 'www.porn.com':
-            self.host = '208.67.222.123' #OpenDNS FamilyShield
-            self.port = 53
-        self.sock = socket.create_connection ((self.host, self.port))
-class MyHTTPHandler (urllib2.HTTPHandler):
-    def http_open (self, req):
-        return self.do_open (MyHTTPConnection, req)
-
 try:
     import signal
     from signal import SIGPIPE, SIG_IGN

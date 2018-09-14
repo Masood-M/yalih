@@ -32,7 +32,7 @@ def scanning(path):
 #Codes for avgscan
 	os.chdir(path)
 		
-	start_time = time.time()
+'''	start_time = time.time()
 	with open(honeypotconfig.wdir + "scanlogs/AVG-report.log", "w") as f:
 		print "\n================ AVG Antivirus Engine is running! Please Wait ================" 
 		f.write("======================================AVG Antivirus======================================\n\n")
@@ -51,7 +51,7 @@ def scanning(path):
 		f.write("Scanning time with AVG engine was: " + str(finish_time) + "\n\n")
 		print "==============================================================================="
 
-'''
+
 
 	os.chdir(path)
 	print "Avast is running!"
