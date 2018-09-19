@@ -16,7 +16,7 @@ def scanning(path):
 		
 	start_time = time.time()
 	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log", "w") as f:
-		print "\n================ ClamAV Antivirus Engine is running! Please Wait ===============" 
+		print "\n=============== ClamAV Antivirus Engine is running! Please Wait ===============" 
 		f.write("======================================ClamAV======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
 		f.write("--------------------------------------------------------------------------------------------------------------------\n\n")
@@ -36,8 +36,8 @@ def scanning(path):
 	os.chdir(path)		
 	start_time = time.time()
 	with open(honeypotconfig.wdir + "scanlogs/Comodo-report.log", "w") as f:
-		print "\n================ COMODO Antivirus Engine is running! Please Wait ==============="
-
+		print "\n=============== COMODO Antivirus Engine is running! Please Wait ==============="
+		print("\n----------- SCAN SUMMARY -----------")
 		f.write("======================================Comodo======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
 		f.write("--------------------------------------------------------------------------------------------------------------------\n\n")
@@ -48,12 +48,12 @@ def scanning(path):
 				sys.stdout.write(line)
 				f.write(line)
 			elif line.find('Number of Scanned ') or line.find('Number of Scanned ') != -1:
+				#print"\n---------------Scan Summary--------------\n"
 				sys.stdout.write(line)
 				f.write(line)
 			else:
 				continue;
 #		print("---------------Scan Summary----------------")
-		
 		f.write("\nsudo /opt/COMODO/cmdscan ARCHIVE LOGLEVEL=2 -v -s "+path+" > "+honeypotconfig.wdir + "scanlogs/Comodo-report.log "+"\n\n")
 		finish_time = time.time() - start_time, "seconds"
 		f.write("Scanning time with COMODO engine was: " + str(finish_time) + "\n\n")
