@@ -42,9 +42,10 @@ from the terminal, in the honeypot folder, run the following commands:
 #sudo apt-get install clamav
 
 
-=>install AVG
-Download AVG package from the following website for your distribution (These are 32bit editions)
-http://free.avg.com/us-en/download.prd-alf
+=>Download and Install COMODO antivirus
+Download COMODO antivirus from https://cdn.download.comodo.com/cis/download/installs/linux/cav-linux_x86.deb and install it using the command:
+#sudo dpkg -i cav-linux_x86.deb
+the Antivurs installs in your /opt/ forlder be default.
 
 if deb file is downloaded:
 #dpkg -i (name of the .deb file)

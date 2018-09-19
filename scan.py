@@ -29,9 +29,35 @@ def scanning(path):
 		f.write("Scanning time with ClamAV engine was: " + str(finish_time) + "\n\n")
 		print "================================================================================"	
 	
-#Codes for avgscan
-	os.chdir(path)
+
 		
+#codes for comodo
+
+	os.chdir(path)		
+	start_time = time.time()
+	with open(honeypotconfig.wdir + "scanlogs/Comodo-report.log", "w") as f:
+		print "\n================ COMODO Antivirus Engine is running! Please Wait ===============" 
+		f.write("======================================Comodo======================================\n\n")
+		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
+		f.write("--------------------------------------------------------------------------------------------------------------------\n\n")
+		COMODOcommand="sudo /opt/COMODO/cmdscan ARCHIVE LOGLEVEL=2 -v -s "+path#+" > "+honeypotconfig.wdir + "scanlogs/tmpCOMODO.log "
+		process = subprocess.Popen(COMODOcommand , shell=True, stdout=subprocess.PIPE)
+		for line in iter(process.stdout.readline, ''):
+			if line.find('Found Virus, ') != -1:
+				sys.stdout.write(line)
+				f.write(line)
+			else:
+				continue;
+#		infected=""grep "Found Virus, "+honeypotconfig.wdir + "scanlogs/tmpCOMODO.log"+" > "+honeypotconfig.wdir + "scanlogs/COMODO.log""
+		f.write("\nsudo /opt/COMODO/cmdscan ARCHIVE LOGLEVEL=2 -v -s "+path+" > "+honeypotconfig.wdir + "scanlogs/Comodo-report.log "+"\n\n")
+		finish_time = time.time() - start_time, "seconds"
+		f.write("Scanning time with COMODO engine was: " + str(finish_time) + "\n\n")
+		print "================================================================================"	
+
+
+
+
+#Codes for avgscan
 '''	start_time = time.time()
 	with open(honeypotconfig.wdir + "scanlogs/AVG-report.log", "w") as f:
 		print "\n================ AVG Antivirus Engine is running! Please Wait ================" 
@@ -50,21 +76,3 @@ def scanning(path):
 		finish_time = time.time() - start_time, "seconds"
 		f.write("Scanning time with AVG engine was: " + str(finish_time) + "\n\n")
 		print "==============================================================================="
-
-
-
-	os.chdir(path)
-	print "Avast is running!"
-	command14="echo ============================================================ > "+honeypotconfig.wdir+"scanlogs/"+"Avast-report.log"
-	command15="echo ========================AVAST Antivirus===================== >> "+honeypotconfig.wdir+"scanlogs/"+"Avast-report.log"
-	os.system(command14)
-	os.system(command15)
-	start_timeavast = time.time()
-	command13="avast -a -r "+honeypotconfig.wdir+"scanlogs/"+"Avast-report.log"
-	os.system(command13)
-	finish_time=time.time()-start_timeavast, "seconds"
-	fileopen=open(honeypotconfig.wdir+"scanlogs/Avast-report.log", "a")
-	fileopen.write("\nScanning time with Avast Antivirus engines was: "+str(finish_time))
-	fileopen.close
-
-'''

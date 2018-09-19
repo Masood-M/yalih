@@ -12,6 +12,14 @@ def unquoteDirectory(path):
 #			if line.startswith(honeypotconfig.wdir):
 #				infected_files[line.split(" ")[0]] = " AVG"
 
+
+	# Open the Comodo log
+	with open(honeypotconfig.wdir + "scanlogs/Comodo-report.log") as f:
+		for line in f:
+			if line.startswith(honeypotconfig.wdir):
+				infected_files[line.split(" ")[0]] = " Comodo"
+
+
 	# Open the Clam-AV log
 	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log") as f:
 		for line in f:
@@ -28,6 +36,8 @@ def unquoteDirectory(path):
 					infected_files[line] = infected_files[line] + ", Clam-AV"
 				else:
 					infected_files[line] = " Clam-AV"
+
+
 
 
 	# Open the YARA log
