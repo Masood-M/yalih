@@ -36,19 +36,24 @@ def scanning(path):
 	os.chdir(path)		
 	start_time = time.time()
 	with open(honeypotconfig.wdir + "scanlogs/Comodo-report.log", "w") as f:
-		print "\n================ COMODO Antivirus Engine is running! Please Wait ===============" 
+		print "\n================ COMODO Antivirus Engine is running! Please Wait ==============="
+
 		f.write("======================================Comodo======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
 		f.write("--------------------------------------------------------------------------------------------------------------------\n\n")
-		COMODOcommand="sudo /opt/COMODO/cmdscan ARCHIVE LOGLEVEL=2 -v -s "+path#+" > "+honeypotconfig.wdir + "scanlogs/tmpCOMODO.log "
+		COMODOcommand="sudo /opt/COMODO/cmdscan ARCHIVE LOGLEVEL=2 -s "+path#+" > "+honeypotconfig.wdir + "scanlogs/tmpCOMODO.log "
 		process = subprocess.Popen(COMODOcommand , shell=True, stdout=subprocess.PIPE)
 		for line in iter(process.stdout.readline, ''):
 			if line.find('Found Virus, ') != -1:
 				sys.stdout.write(line)
 				f.write(line)
+			elif line.find('Number of Scanned ') or line.find('Number of Scanned ') != -1:
+				sys.stdout.write(line)
+				f.write(line)
 			else:
 				continue;
-#		infected=""grep "Found Virus, "+honeypotconfig.wdir + "scanlogs/tmpCOMODO.log"+" > "+honeypotconfig.wdir + "scanlogs/COMODO.log""
+#		print("---------------Scan Summary----------------")
+		
 		f.write("\nsudo /opt/COMODO/cmdscan ARCHIVE LOGLEVEL=2 -v -s "+path+" > "+honeypotconfig.wdir + "scanlogs/Comodo-report.log "+"\n\n")
 		finish_time = time.time() - start_time, "seconds"
 		f.write("Scanning time with COMODO engine was: " + str(finish_time) + "\n\n")
