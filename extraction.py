@@ -87,10 +87,10 @@ def js_extraction(response, scheme, host):
 
 			jsurl_list.append(link)
 
-		elif not link.lower().startswith(("//","/","www.","http://","https://","./","../")):
-			jsurl_list_old.append(link)
-			link = scheme + "://" + host + "/" + link
-			jsurl_list.append(link)
+#		elif not link.lower().startswith(("//","/","www.","http://","https://","./","../")):
+#			jsurl_list_old.append(link)
+#			link = scheme + "://" + host + "/" + link
+#			jsurl_list.append(link)
 
 		else:
 			jsurl_list_old.append(link)

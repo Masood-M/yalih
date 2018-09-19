@@ -169,12 +169,15 @@ def executemechanize(urldict):
 			link=normalize.normalizeurl2(link)
 			if len(link)>250:
 				continue
-#			print link
+			if link.lower().startswith(("js/", "catalog/", "script/", "scripts/", "katalog/","template/","templates/","includes/","static/","mod/","files/","data/","css/","components/","component/","sites/","default/","./javascripts/")):
+				link = scheme + "://" + host + "/" + link
+			print "****"+link
 			try:			
-				r = br.open(normalize.normalizeurl2(link), timeout=12.0)
-				logger.debug(str(url_no) + ",\t" + url + ",\tJS retrieve,\t" + link)	
+				r = br.open(normalize.normalizeurl2(link.strip()), timeout=12.0)
+				logger.info(str(url_no) + ",\t" + url + ",\tJS retrieve,\t" + link)	
 				js_name = link[link.rfind("/") + 1:]
 				response = br.response().read()
+				print "***"+js_name+"***"
 
 				# If it doesn't end with ".js" eg. "abc.js?key=123" truncate after "?"
 				if not js_name.endswith(".js"):

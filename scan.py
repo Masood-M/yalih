@@ -76,3 +76,4 @@ def scanning(path):
 		finish_time = time.time() - start_time, "seconds"
 		f.write("Scanning time with AVG engine was: " + str(finish_time) + "\n\n")
 		print "==============================================================================="
+'''
