@@ -134,7 +134,7 @@ def content_parser(data,
     :param bytes data: The data to parse
     :param url: The URL of the document being parsed or None
     :param response_info: Information about the document
-        (contains all HTTP headers as :class:`mimetools.Message`)
+        (contains all HTTP headers as :class:`HTTPMessage`)
     :param transport_encoding: The character encoding for the document being
         parsed as specified in the HTTP headers or None.
     :param default_encoding: The character encoding to use if no encoding
@@ -145,12 +145,12 @@ def content_parser(data,
         return
     try:
         from html5_parser import parse
-    except ImportError:
+    except Exception:
         from html5lib import parse
-        return parse(
-            data,
-            transport_encoding=transport_encoding,
-            namespaceHTMLElements=False)
+        kw = {'namespaceHTMLElements': False}
+        if transport_encoding and isinstance(data, bytes):
+            kw['transport_encoding'] = transport_encoding
+        return parse(data, **kw)
     else:
         return parse(data, transport_encoding=transport_encoding)
 

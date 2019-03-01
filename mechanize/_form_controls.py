@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=utf-8
 from __future__ import absolute_import
 
@@ -9,12 +9,18 @@ import warnings
 from io import BytesIO
 
 from . import _request
-from .polyglot import urlparse, urlunparse, urlencode, is_py2, iteritems
+from .polyglot import (as_unicode, is_py2, iteritems, urlencode, urlparse,
+                       urlunparse)
 
 if is_py2:
     from cStringIO import StringIO
 else:
-    from io import StringIO  # 2to3: probably broken when writing bytes
+    class StringIO(BytesIO):
+
+        def write(self, x):
+            if isinstance(x, str):
+                x = x.encode('utf-8')
+            BytesIO.write(self, x)
 
 
 class Missing:
@@ -177,7 +183,8 @@ class MimeWriter:
                 self._headers.append(line)
 
     def flushheaders(self):
-        self._fp.writelines(self._headers)
+        for line in self._headers:
+            self._fp.write(line)
         self._headers = []
 
     def startbody(self,
@@ -351,7 +358,9 @@ class Control:
         """Write data for a subitem of this control to a MimeWriter."""
         # called by HTMLForm
         mw2 = mw.nextpart()
-        mw2.addheader("Content-Disposition", 'form-data; name="%s"' % name, 1)
+        mw2.addheader(
+            "Content-Disposition", 'form-data; name="%s"' % as_unicode(name),
+            1)
         f = mw2.startbody(prefix=0)
         f.write(value)
 
@@ -2198,10 +2207,11 @@ class HTMLForm:
         Note the following useful HTML attributes of file upload controls (see
         HTML 4.01 spec, section 17):
 
-          * `accept`: comma-separated list of content types that the server will
-             handle correctly; you can use this to filter out non-conforming files
-          * `size`: XXX IIRC, this is indicative of whether form wants multiple or
-             single files
+          * `accept`: comma-separated list of content types
+             that the server will handle correctly;
+             you can use this to filter out non-conforming files
+          * `size`: XXX IIRC, this is indicative of whether form
+             wants multiple or single files
           * `maxlength`: XXX hint of max content length in bytes?
 
         """
@@ -2521,7 +2531,8 @@ class HTMLForm:
                 mw.startmultipartbody(
                     "form-data", add_to_http_hdrs=True, prefix=0)
                 for ii, k, v, control_index in self._pairs_and_controls():
-                    self.controls[control_index]._write_mime_data(mw, as_utf8(k), as_utf8(v))
+                    self.controls[control_index]._write_mime_data(
+                            mw, as_utf8(k), as_utf8(v))
                 mw.lastpart()
                 return uri, data.getvalue(), http_hdrs
             else:

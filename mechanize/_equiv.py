@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=utf-8
 # License: BSD Copyright: 2017, Kovid Goyal <kovid at kovidgoyal.net>
 
@@ -17,8 +17,9 @@ ascii_letters_bytes = frozenset(
     item.encode("ascii") for item in string.ascii_letters)
 spaces_angle_brackets = space_chars_bytes | frozenset((b">", b"<"))
 skip1 = space_chars_bytes | frozenset((b"/", ))
-head_elems = frozenset(("html", "head", "title", "base", "script", "style",
-                        "meta", "link", "object"))
+head_elems = frozenset((
+    b"html", b"head", b"title", b"base", b"script",
+    b"style", b"meta", b"link", b"object"))
 
 
 def my_unichr(num):

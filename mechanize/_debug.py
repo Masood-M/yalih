@@ -27,7 +27,8 @@ class HTTPRedirectDebugProcessor(BaseHandler):
 
     def http_request(self, request):
         if hasattr(request, "redirect_dict"):
+#            info = logging.getLogger("mechanize.http_redirects").info
+ #           info("redirecting to %s", request.get_full_url())
             info = logging.getLogger("mechanize.http_redirects").info
             info("redirecting from %s to %s", request.get_origin_req_host(), request.get_full_url())
-
         return request

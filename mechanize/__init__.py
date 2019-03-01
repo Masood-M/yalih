@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-
 import logging
 
 from ._clientcookie import request_host_lc as request_host
@@ -43,7 +42,7 @@ from ._useragent import UserAgent, UserAgentBase
 from ._util import http2time as str2time
 from ._version import __version__
 from ._gzip import HTTPGzipProcessor
-import _redirection
+from ._redirection import redirection
 # If you hate the idea of turning bugs into warnings, do:
 # import mechanize; mechanize.USE_BARE_EXCEPT = False
 USE_BARE_EXCEPT = True

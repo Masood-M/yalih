@@ -765,7 +765,8 @@ class Browser(UserAgentBase):
         :param tag: element name of opening tag, e.g. "a"
         :param predicate: a function taking a Link object as its single
             argument, returning a boolean result, indicating whether the links
-        :param nr: matches the nth link that matches all other criteria (default 0)
+        :param nr: matches the nth link that matches all other
+            criteria (default 0)
 
         """
         try:
@@ -783,6 +784,16 @@ class Browser(UserAgentBase):
                 "%s instance has no attribute %s (perhaps you forgot to "
                 ".select_form()?)" % (self.__class__, name))
         return getattr(form, name)
+
+    def __getitem__(self, name):
+        if self.form is None:
+            raise BrowserStateError('No form selected')
+        return self.form[name]
+
+    def __setitem__(self, name, val):
+        if self.form is None:
+            raise BrowserStateError('No form selected')
+        self.form[name] = val
 
     def _filter_links(self,
                       links,

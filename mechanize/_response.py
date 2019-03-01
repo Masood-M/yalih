@@ -19,11 +19,10 @@ included with the distribution).
 from __future__ import absolute_import
 from functools import partial
 import copy
-import mimetools
 from io import BytesIO
 
 from ._headersutil import normalize_header_name
-from .polyglot import HTTPError
+from .polyglot import HTTPError, create_response_info
 
 
 def len_of_seekable(file_):
@@ -253,7 +252,7 @@ class seek_wrapper:
 
     def __next__(self):
         line = self.readline()
-        if line == "":
+        if not line:
             raise StopIteration
         return line
     next = __next__
@@ -306,16 +305,16 @@ class eoffile:
     # file-like object that always claims to be at end-of-file...
 
     def read(self, size=-1):
-        return ""
+        return b""
 
     def readline(self, size=-1):
-        return ""
+        return b""
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        return ""
+        return b""
     next = __next__
 
     def close(self):
@@ -364,7 +363,8 @@ class closeable_response:
     # presence of this attr indicates is useable after .close()
     closeable_response = None
 
-    def __init__(self, fp, headers, url, code, msg, http_version=None):
+    def __init__(
+            self, fp, headers, url, code=200, msg='OK', http_version=None):
         self._set_fp(fp)
         self._headers = headers
         self._url = url
@@ -423,28 +423,6 @@ class closeable_response:
                                   self.msg)
         self._set_fp(new_wrapped)
 
-    def __getstate__(self):
-        # There are three obvious options here:
-        # 1. truncate
-        # 2. read to end
-        # 3. close socket, pickle state including read position, then open
-        #    again on unpickle and use Range header
-        # XXXX um, 4. refuse to pickle unless .close()d.  This is better,
-        #  actually ("errors should never pass silently").  Pickling doesn't
-        #  work anyway ATM, because of http://python.org/sf/1144636 so fix
-        #  this later
-
-        # 2 breaks pickle protocol, because one expects the original object
-        # to be left unscathed by pickling.  3 is too complicated and
-        # surprising (and too much work ;-) to happen in a sane __getstate__.
-        # So we do 1.
-
-        state = self.__dict__.copy()
-        new_wrapped = eofresponse(self._url, self._headers, self.code,
-                                  self.msg)
-        state["wrapped"] = new_wrapped
-        return state
-
 
 def test_response(data='test data',
                   headers=[],
@@ -474,6 +452,8 @@ def make_response(data, headers, url, code, msg):
 
     """
     mime_headers = make_headers(headers)
+    if not isinstance(data, bytes):
+        data = data.encode('utf-8')
     r = closeable_response(BytesIO(data), mime_headers, url, code, msg)
     return response_seek_wrapper(r)
 
@@ -485,7 +465,10 @@ def make_headers(headers):
     hdr_text = []
     for name_value in headers:
         hdr_text.append("%s: %s" % name_value)
-    return mimetools.Message(BytesIO("\n".join(hdr_text)))
+    ans = "\n".join(hdr_text)
+    if not isinstance(ans, bytes):
+        ans = ans.encode('iso-8859-1')
+    return create_response_info(BytesIO(ans))
 
 
 # Rest of this module is especially horrible, but needed, at least until fork
@@ -495,8 +478,10 @@ def make_headers(headers):
 def get_seek_wrapper_class(response):
     # in order to wrap response objects that are also exceptions, we must
     # dynamically subclass the exception :-(((
-    if (isinstance(response, HTTPError) and
-            not hasattr(response, "seek")):
+    if (
+            isinstance(response, HTTPError) and
+            not isinstance(response, seek_wrapper)
+    ):
         if response.__class__.__module__ == "__builtin__":
             exc_class_name = response.__class__.__name__
         else:
@@ -528,6 +513,15 @@ def get_seek_wrapper_class(response):
     return wrapper_class
 
 
+def needs_seek_wrapper(obj):
+    return (
+            not isinstance(obj, seek_wrapper) and (
+                hasattr(obj, 'seek') or isinstance(obj, HTTPError)
+                or not hasattr(obj, 'get_data')
+                )
+            )
+
+
 def seek_wrapped_response(response):
     """Return a copy of response that supports seekable response interface.
 
@@ -537,7 +531,7 @@ def seek_wrapped_response(response):
     can't be simply wrapped due to the requirement of preserving the exception
     base class).
     """
-    if not hasattr(response, "seek"):
+    if needs_seek_wrapper(response):
         wrapper_class = get_seek_wrapper_class(response)
         response = wrapper_class(response)
     assert hasattr(response, "get_data")
@@ -559,7 +553,7 @@ def upgrade_response(response):
     """
     wrapper_class = get_seek_wrapper_class(response)
     if hasattr(response, "closeable_response"):
-        if not hasattr(response, "seek"):
+        if needs_seek_wrapper(response):
             response = wrapper_class(response)
         assert hasattr(response, "get_data")
         return copy.copy(response)
