@@ -26,14 +26,14 @@ import copy
 import re
 from collections import namedtuple
 
+
 class Options:
     def __init__(self, options=None, merge_child_field=None):
         self.css = None
         self.js = None
         self.html = None
 
-        options = _mergeOpts(options, merge_child_field)
-        self.raw_options = _normalizeOpts(options)
+        self.raw_options = _mergeOpts(options, merge_child_field)
 
         # Support passing the source text back with no change
         self.disabled = self._get_boolean('disabled')
@@ -45,18 +45,30 @@ class Options:
         self.indent_level = self._get_number('indent_level')
 
         self.preserve_newlines = self._get_boolean('preserve_newlines', True)
-        # TODO: fix difference in js and python
-        self.max_preserve_newlines = self.max_preserve_newlines = self._get_number('max_preserve_newlines', 10)
+        self.max_preserve_newlines = self._get_number(
+            'max_preserve_newlines', 32786)
+
         if not self.preserve_newlines:
             self.max_preserve_newlines = 0
 
-        self.indent_with_tabs = self._get_boolean('indent_with_tabs')
+        self.indent_with_tabs = self._get_boolean(
+            'indent_with_tabs', self.indent_char == '\t')
         if self.indent_with_tabs:
             self.indent_char = '\t'
-            self.indent_size = 1
+
+            # indent_size behavior changed after 1.8.6
+            # It used to be that indent_size would be
+            # set to 1 for indent_with_tabs. That is no longer needed and
+            # actually doesn't make sense - why not use spaces? Further,
+            # that might produce unexpected behavior - tabs being used
+            # for single-column alignment. So, when indent_with_tabs is true
+            # and indent_size is 1, reset indent_size to 4.
+            if self.indent_size == 1:
+                self.indent_size = 4
 
         # Backwards compat with 1.3.x
-        self.wrap_line_length = self._get_number('wrap_line_length', self._get_number('max_char'))
+        self.wrap_line_length = self._get_number(
+            'wrap_line_length', self._get_number('max_char'))
 
     def _get_array(self, name, default_value=[]):
         option_value = getattr(self.raw_options, name, default_value)
@@ -82,7 +94,8 @@ class Options:
         option_value = getattr(self.raw_options, name, default_value)
         result = ''
         if isinstance(option_value, str):
-            result = option_value.replace('\\r', '\r').replace('\\n', '\n').replace('\\t', '\t')
+            result = option_value.replace('\\r', '\r').replace(
+                '\\n', '\n').replace('\\t', '\t')
 
         return result
 
@@ -107,7 +120,6 @@ class Options:
                 "'")
 
         return result[0]
-
 
     def _get_selection_list(self, name, selection_list, default_value=None):
         if not selection_list:
@@ -144,7 +156,7 @@ class Options:
 # Example: obj = {a: 1, b: {a: 2}}
 #          mergeOpts(obj, 'b')
 #
-#          Returns: {a: 2, b: {a: 2}}
+#          Returns: {a: 2}
 
 
 def _mergeOpts(options, childFieldName):
@@ -154,19 +166,26 @@ def _mergeOpts(options, childFieldName):
     if isinstance(options, tuple):
         options = dict(options)
 
-    if isinstance(options, dict):
-        options = _normalizeOpts(options)
-        options = namedtuple("CustomOptions", options.keys())(*options.values())
-
+    options = _normalizeOpts(options)
     finalOpts = copy.copy(options)
+    if isinstance(options, dict):
+        local = finalOpts.get(childFieldName, None)
+        if local:
+            del(finalOpts[childFieldName])
+            for key in local:
+                finalOpts[key] = local[key]
+        finalOpts = namedtuple("CustomOptions", finalOpts.keys())(
+            *finalOpts.values())
 
-    local = getattr(finalOpts, childFieldName, None)
-    if local:
-        delattr(finalOpts, childFieldName)
-        for key in local:
-            setattr(finalOpts, key, local[key])
+    if isinstance(options, Options):
+        local = getattr(finalOpts, childFieldName, None)
+        if local:
+            delattr(finalOpts, childFieldName)
+            for key in local:
+                setattr(finalOpts, key, local[key])
 
     return finalOpts
+
 
 def _normalizeOpts(options):
     convertedOpts = copy.copy(options)
@@ -181,6 +200,7 @@ def _normalizeOpts(options):
         for key in option_keys:
             if '-' in key:
                 delattr(convertedOpts, key)
-                setattr(convertedOpts, key.replace('-', '_'), getattr(options, key, None))
+                setattr(convertedOpts, key.replace(
+                    '-', '_'), getattr(options, key, None))
 
     return convertedOpts

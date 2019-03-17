@@ -5,6 +5,7 @@ import copy
 from .options import BeautifierOptions
 from jsbeautifier.core.output import Output
 from jsbeautifier.core.inputscanner import InputScanner
+from jsbeautifier.core.directives import Directives
 from jsbeautifier.__version__ import __version__
 
 # This is not pretty, but given how we did the version import
@@ -38,6 +39,7 @@ six = __import__("six")
 # SOFTWARE.
 
 
+directives_core = Directives(r'/\*', r'\*/')
 
 whitespaceChar = re.compile(r"\s")
 whitespacePattern = re.compile(r"(?:\s|\n)+")
@@ -184,9 +186,8 @@ class Beautifier:
             self._output.space_before_token = True
 
     def print_string(self, output_string):
-        if self._output.just_added_newline():
-            self._output.set_indent(self._indentLevel)
-
+        self._output.set_indent(self._indentLevel)
+        self._output.non_breaking_space = True
         self._output.add_token(output_string)
 
 
@@ -241,9 +242,14 @@ class Beautifier:
                 # minified code is being beautified.
                 self._output.add_new_line()
                 self._input.back()
-                self.print_string(
-                    self._input.read(
-                        self.block_comment_pattern))
+                comment = self._input.read(self.block_comment_pattern)
+
+                # handle ignore directive
+                directives = directives_core.get_directives(comment)
+                if directives and directives.get('ignore') == 'start':
+                    comment += directives_core.readIgnored(self._input)
+
+                self.print_string(comment)
 
                 # Ensures any new lines following the comment are preserved
                 self.eatWhitespace(True)

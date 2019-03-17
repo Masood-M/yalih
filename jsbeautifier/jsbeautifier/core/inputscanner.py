@@ -22,9 +22,12 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
+
 
 class InputScanner:
     def __init__(self, input_string):
+        self.__six = __import__("six")
         if input_string is None:
             input_string = ''
         self.__input = input_string
@@ -65,7 +68,7 @@ class InputScanner:
     def testChar(self, pattern, index=0):
         # test one character regex match
         val = self.peek(index)
-        return val is not None and pattern.match(val)
+        return val is not None and bool(pattern.match(val))
 
     def match(self, pattern):
         pattern_match = None
@@ -75,11 +78,18 @@ class InputScanner:
                 self.__position = pattern_match.end(0)
         return pattern_match
 
-    def read(self, pattern):
+    def read(self, starting_pattern, until_pattern=None, until_after=False):
         val = ''
-        pattern_match = self.match(pattern)
-        if bool(pattern_match):
-            val = pattern_match.group(0)
+        pattern_match = None
+        if bool(starting_pattern):
+            pattern_match = self.match(starting_pattern)
+            if bool(pattern_match):
+                val = pattern_match.group(0)
+
+        if bool(until_pattern) and \
+                (bool(pattern_match) or not bool(starting_pattern)):
+            val += self.readUntil(until_pattern, until_after)
+
         return val
 
     def readUntil(self, pattern, include_match=False):
@@ -102,7 +112,16 @@ class InputScanner:
         return val
 
     def readUntilAfter(self, pattern):
-        return self.readUntil(pattern, include_match=True)
+        return self.readUntil(pattern, True)
+
+    def get_regexp(self, pattern, match_from=False):
+        result = None
+        # strings are converted to regexp
+        if isinstance(pattern, self.__six.string_types) and pattern != '':
+            result = re.compile(pattern)
+        elif pattern is not None:
+            result = re.compile(pattern.pattern)
+        return result
 
     # css beautifier legacy helpers
     def peekUntilAfter(self, pattern):

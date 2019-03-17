@@ -55,6 +55,7 @@ class BeautifierFlags:
         self.in_case_statement = False
         self.case_body = False
         self.indentation_level = 0
+        self.alignment = 0
         self.line_indent_level = 0
         self.start_line_index = 0
         self.ternary_depth = 0
@@ -293,13 +294,7 @@ class Beautifier:
                 # These tokens should never have a newline inserted between
                 # them and the following expression.
                 return
-            proposed_line_length = self._output.current_line.get_character_count() + \
-                len(current_token.text)
-            if self._output.space_before_token:
-                proposed_line_length += 1
-
-            if proposed_line_length >= self._options.wrap_line_length:
-                self.print_newline(preserve_statement_flags=True)
+            self._output.set_wrap_point()
 
     def print_newline(
             self,
@@ -320,11 +315,15 @@ class Beautifier:
     def print_token_line_indentation(self, current_token):
         if self._output.just_added_newline():
             line = self._output.current_line
-            if self._options.keep_array_indentation and self.is_array(
-                    self._flags.mode) and current_token.newlines:
+            if self._options.keep_array_indentation and \
+                current_token.newlines and \
+                (self.is_array(self._flags.mode) or
+                        current_token.text == '['):
+                line.set_indent(-1)
                 line.push(current_token.whitespace_before)
                 self._output.space_before_token = False
-            elif self._output.set_indent(self._flags.indentation_level):
+            elif self._output.set_indent(self._flags.indentation_level,
+                            self._flags.alignment):
                 self._flags.line_indent_level = self._flags.indentation_level
 
     def print_token(self, current_token, s=None):
@@ -354,10 +353,15 @@ class Beautifier:
             s = current_token.text
 
         self.print_token_line_indentation(current_token)
+        self._output.non_breaking_space = True
         self._output.add_token(s)
+        if self._output.previous_token_wrapped:
+            self._flags.multiline_frame = True
 
     def indent(self):
         self._flags.indentation_level += 1
+        self._output.set_indent(self._flags.indentation_level,
+            self._flags.alignment)
 
     def deindent(self):
         allow_deindent = self._flags.indentation_level > 0 and (
@@ -365,6 +369,10 @@ class Beautifier:
 
         if allow_deindent:
             self._flags.indentation_level -= 1
+
+        self._output.set_indent(self._flags.indentation_level,
+            self._flags.alignment)
+
 
     def set_mode(self, mode):
         if self._flags:
@@ -379,12 +387,18 @@ class Beautifier:
             self._output.just_added_newline())
         self._flags.start_line_index = self._output.get_line_number()
 
+        self._output.set_indent(self._flags.indentation_level,
+            self._flags.alignment)
+
     def restore_mode(self):
         if len(self._flag_store) > 0:
             self._previous_flags = self._flags
             self._flags = self._flag_store.pop()
             if self._previous_flags.mode == MODE.Statement:
                 remove_redundant_indentation(self._output, self._previous_flags)
+
+        self._output.set_indent(self._flags.indentation_level,
+            self._flags.alignment)
 
     def start_of_object_property(self):
         return self._flags.parent.mode == MODE.ObjectLiteral and self._flags.mode == MODE.Statement and (
@@ -398,6 +412,7 @@ class Beautifier:
             current_token.type == TOKEN.WORD)
         start = start or reserved_word(self._flags.last_token, 'do')
         start = start or (
+            not (self._flags.parent.mode == MODE.ObjectLiteral and self._flags.mode == MODE.Statement) and
             reserved_array(self._flags.last_token, self._newline_restricted_tokens) and
             not current_token.newlines)
         start = start or (
@@ -445,8 +460,8 @@ class Beautifier:
             if self._flags.last_token.type == TOKEN.WORD or self._flags.last_token.text == ')':
                 if reserved_array(self._flags.last_token, Tokenizer.line_starters):
                     self._output.space_before_token = True
-                self.set_mode(next_mode)
                 self.print_token(current_token)
+                self.set_mode(next_mode)
                 self.indent()
                 if self._options.space_in_paren:
                     self._output.space_before_token = True
@@ -495,6 +510,28 @@ class Beautifier:
                     self.allow_wrap_or_preserved_newline(current_token)
             elif self._flags.last_token.type == TOKEN.WORD:
                 self._output.space_before_token = False
+                # function name() vs function name ()
+                # function* name() vs function* name ()
+                # async name() vs async name ()
+                # In ES6, you can also define the method properties of an object
+                # var obj = {a: function() {}}
+                # It can be abbreviated
+                # var obj = {a() {}}
+                # var obj = { a() {}} vs var obj = { a () {}}
+                # var obj = { * a() {}} vs var obj = { * a () {}}
+                peek_back_two = self._tokens.peek(-3)
+                if self._options.space_after_named_function and peek_back_two:
+                    # peek starts at next character so -1 is current token
+                    peek_back_three = self._tokens.peek(-4)
+                    if reserved_array(peek_back_two, ['async', 'function']) or (
+                        peek_back_two.text == '*' and
+                            reserved_array(peek_back_three, ['async', 'function'])):
+                        self._output.space_before_token = True
+                    elif self._flags.mode == MODE.ObjectLiteral:
+                        if (peek_back_two.text == '{' or peek_back_two.text == ',') or (
+                            peek_back_two.text == '*' and (
+                                peek_back_three.text == '{' or peek_back_three.text == ',')):
+                            self._output.space_before_token = True
             else:
                 # Support preserving wrapped arrow function expressions
                 # a.b('c',
@@ -523,8 +560,8 @@ class Beautifier:
             self.allow_wrap_or_preserved_newline(
                 current_token, current_token.newlines)
 
-        self.set_mode(next_mode)
         self.print_token(current_token)
+        self.set_mode(next_mode)
 
         if self._options.space_in_paren:
             self._output.space_before_token = True
@@ -554,12 +591,9 @@ class Beautifier:
             else:
                 self._output.space_before_token = True
 
-        if current_token.text == ']' and self._options.keep_array_indentation:
-            self.print_token(current_token)
-            self.restore_mode()
-        else:
-            self.restore_mode()
-            self.print_token(current_token)
+        self.deindent()
+        self.print_token(current_token)
+        self.restore_mode()
 
         remove_redundant_indentation(self._output, self._previous_flags)
 
@@ -665,6 +699,13 @@ class Beautifier:
         self.print_token(current_token)
         self.indent()
 
+        # Except for specific cases, open braces are followed by a new line.
+        if not empty_braces and not (
+                self._options.brace_preserve_inline and
+                    self._flags.inline_frame):
+            self.print_newline()
+
+
     def handle_end_block(self, current_token):
         # statements must all be closed when their container closes
         self.handle_whitespace_and_comments(current_token)
@@ -698,6 +739,8 @@ class Beautifier:
         if current_token.type == TOKEN.RESERVED:
             if current_token.text in [
                     'set', 'get'] and self._flags.mode != MODE.ObjectLiteral:
+                current_token.type = TOKEN.WORD
+            elif current_token.text == 'import' and self._tokens.peek().text == '(':
                 current_token.type = TOKEN.WORD
             elif current_token.text in ['as', 'from'] and not self._flags.import_block:
                 current_token.type = TOKEN.WORD
@@ -1204,27 +1247,38 @@ class Beautifier:
 
         # block comment starts with a new line
         self.print_newline(preserve_statement_flags=preserve_statement_flags)
-        if len(lines) > 1:
-            javadoc = not any(l for l in lines[1:] if (
-                l.strip() == '' or (l.lstrip())[0] != '*'))
-            starless = all(l.startswith(last_indent)
-                           or l.strip() == '' for l in lines[1:])
 
         # first line always indented
         self.print_token(current_token, lines[0])
-        for line in lines[1:]:
-            self.print_newline(preserve_statement_flags=True)
-            if javadoc:
-                # javadoc: reformat and re-indent
-                self.print_token(current_token, ' ' + line.lstrip())
-            elif starless and len(line) > last_indent_length:
-                # starless: re-indent non-empty content, avoiding trim
-                self.print_token(current_token, line[last_indent_length:])
-            else:
-                # normal comments output raw
-                self._output.add_token(line)
-
         self.print_newline(preserve_statement_flags=preserve_statement_flags)
+
+        if len(lines) > 1:
+            lines = lines[1:]
+            javadoc = not any(l for l in lines if (
+                l.strip() == '' or (l.lstrip())[0] != '*'))
+            starless = all(l.startswith(last_indent)
+                           or l.strip() == '' for l in lines)
+
+            if javadoc:
+                self._flags.alignment = 1
+
+            for line in lines:
+                if javadoc:
+                    # javadoc: reformat and re-indent
+                    self.print_token(current_token, line.lstrip())
+                elif starless and len(line) > last_indent_length:
+                    # starless: re-indent non-empty content, avoiding trim
+                    self.print_token(current_token, line[last_indent_length:])
+                else:
+                    # normal comments output raw
+                    self._output.current_line.set_indent(-1)
+                    self._output.add_token(line)
+
+                # for comments on their own line or  more than one line,
+                # make sure there's a new line after
+                self.print_newline(preserve_statement_flags=preserve_statement_flags)
+
+            self._flags.alignment = 0
 
     def handle_comment(self, current_token, preserve_statement_flags):
         if current_token.newlines:
