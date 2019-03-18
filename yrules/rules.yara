@@ -20,7 +20,7 @@ rule SuspicousBodyOnload
                 $body
 }
 
-
+/*
 
 rule PossibleShellcodePattern
 {
@@ -60,7 +60,7 @@ rule PossibleIFrame
 }
 
 
-
+*/
 
 
 	
