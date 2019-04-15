@@ -5,21 +5,6 @@ infected_files = dict()
 
 def unquoteDirectory(path):
 
-	# Open the AVG log
-#	with open(honeypotconfig.wdir + "scanlogs/AVG-report.log") as f:
-#		for line in f:
-#			# Store the directory path as the key for infected_files
-#			if line.startswith(honeypotconfig.wdir):
-#				infected_files[line.split(" ")[0]] = " AVG"
-
-
-	# Open the Comodo log
-	with open(honeypotconfig.wdir + "scanlogs/Comodo-report.log") as f:
-		for line in f:
-			if line.startswith(honeypotconfig.wdir):
-				infected_files[line.split(" ")[0]] = " Comodo"
-
-
 	# Open the Clam-AV log
 	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log") as f:
 		for line in f:

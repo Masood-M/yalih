@@ -42,21 +42,6 @@ from the terminal, in the honeypot folder, run the following commands:
 #sudo apt-get install clamav
 
 
-=>Download and Install COMODO antivirus
-Download COMODO antivirus from https://cdn.download.comodo.com/cis/download/installs/linux/cav-linux_x86.deb and install it using the command:
-#sudo dpkg -i cav-linux_x86.deb
-the Antivurs installs in your /opt/ forlder be default.
-
-if deb file is downloaded:
-#dpkg -i (name of the .deb file)
-#sysctl -w kernel.shmmax=128000000
-
-if you are installing on a 64bit system, you may need to install the following packages for AVG to run properly:
-
-ai32-bit
-glibc.i686
-
-
 =>install Yara
 
 yara requires:
