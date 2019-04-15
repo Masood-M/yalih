@@ -6,7 +6,7 @@ infected_files = dict()
 def unquoteDirectory(path):
 
 	# Open the Clam-AV log
-	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log") as f:
+	with open("scanlogs/Clam-report.log") as f:
 		for line in f:
 			if line.strip().endswith("FOUND"):
 				line = line.split(":")[0]
@@ -26,7 +26,7 @@ def unquoteDirectory(path):
 
 
 	# Open the YARA log
-	with open(honeypotconfig.wdir + "scanlogs/Yara-report.log") as f:
+	with open("scanlogs/Yara-report.log") as f:
 		start = False
 		for line in f:
 			# The start of yara rule
@@ -72,7 +72,7 @@ def unquoteDirectory(path):
 
 
 	# Write to file, replacing %3A%2F%2F with ://
-	with open(honeypotconfig.wdir + "scanlogs/Malicious-Websites.log", "w") as f:
+	with open("scanlogs/Malicious-Websites.log", "w") as f:
 		f.write("Infected directories: " + str(len(infected_urls)) + "\n")
 		for k, v in infected_urls.iteritems():
 			f.write("\n\n" + k.replace("%3A%2F%2F" , "://"))

@@ -80,12 +80,12 @@ def main():
 		parser.print_help()
 		sys.exit(1)
 	args = parser.parse_args()
-	path = honeypotconfig.wdir + honeypotconfig.tmpfolder
+	path = honeypotconfig.tmpfolder
 
 
 #create the tmp folder
-	if not os.path.isdir(os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder)):
-		os.makedirs(os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder))           
+	if not os.path.isdir(os.path.join(honeypotconfig.tmpfolder)):
+		os.makedirs("tmp")           
 
 		
 #Crawler
@@ -94,9 +94,9 @@ def main():
 		
 #Logging
 	"""Initialize logger."""
-	command = "mkdir -p "+honeypotconfig.wdir+"debug/" #create a temporary folder in your working space folder
+	command = "mkdir -p debug/" #create a temporary folder in your working space folder
 	os.system(command)
-	sys.stdin=open(honeypotconfig.wdir+"debug/" +  time.asctime(time.localtime(time.time())) +".log", "a")
+	sys.stdin=open(debug/" +  time.asctime(time.localtime(time.time())) +".log", "a")
 	logger = logging.getLogger()
 	
 	sh = logging.StreamHandler()
@@ -121,13 +121,13 @@ def main():
 #Blacklist Databases
 	if args.blacklist:
 		try:
-			if not os.path.exists(os.path.join(honeypotconfig.wdir, "list")):
-				os.mkdir(os.path.join(honeypotconfig.wdir, "list"))
+			if not os.path.exists("list"):
+				os.mkdir("list")
 		except OSError as e:	
 			logger.error(e)	
 		malwebsites.domaindownload()
 		malwebsites.duplicateremover()
-		urls = open(honeypotconfig.wdir+"list/malwebsites.txt", "r")
+		urls = open("list/malwebsites.txt", "r")
 		counter = 0
 		for line in urls:
 			dict={}

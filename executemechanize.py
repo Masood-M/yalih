@@ -123,12 +123,12 @@ def executemechanize(urldict):
 		first_char = re.sub(r"(http://|https://)?(www.)?", "", url)[:1]
 		second_char = re.sub(r"(http://|https://)?(www.)?", "", url)[1:3]
 
-		directory_name = os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder, first_char,  second_char, fdirname)
+		directory_name = os.path.join(honeypotconfig.tmpfolder, first_char,  second_char, fdirname)
 
 		# If using proxy, names directory in the format ip_address:port
 		if honeypotconfig.proxy:
 			proxy_name = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
-			directory_name = os.path.join(honeypotconfig.wdir, proxy_name, first_char, second_char, fdirname)
+			directory_name = os.path.join(proxy_name, first_char, second_char, fdirname)
  
  		create_directory(directory_name)
 
@@ -184,10 +184,10 @@ def executemechanize(urldict):
 					js_name = js_name[0:js_name.rfind("?")]
 
 				# Writes js file
-				js_file_path = os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder, first_char, second_char, fdirname, "javascripts", js_name)
+				js_file_path = os.path.join(honeypotconfig.tmpfolder, first_char, second_char, fdirname, "javascripts", js_name)
 				if honeypotconfig.proxy:
 					proxyname = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
-					js_file_path = os.path.join(honeypotconfig.wdir, proxyname, first_char, second_char, fdirname, "javascripts", js_name)
+					js_file_path = os.path.join(proxyname, first_char, second_char, fdirname, "javascripts", js_name)
 				jswrite = open(js_file_path, 'w')
 				jswrite.write(response)
 
@@ -228,10 +228,10 @@ def executemechanize(urldict):
 				exename = link[link.rfind("/") + 1:]
 				if size < honeypotconfig.exe_max_size:
 					logger.info(str(url_no) + ",\t" + url + ",\t" + "EXE retrieve,\t" + link)
-					exe_file_path = os.path.join(honeypotconfig.wdir, honeypotconfig.tmpfolder, first_char, second_char, fdirname, "exe", exename)
+					exe_file_path = os.path.join(honeypotconfig.tmpfolder, first_char, second_char, fdirname, "exe", exename)
 					if honeypotconfig.proxy:
 						proxyname = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
-						exe_file_path = os.path.join(honeypotconfig.wdir, proxyname, first_char, second_char, fdirname, "exe", js_name)
+						exe_file_path = os.path.join(proxyname, first_char, second_char, fdirname, "exe", js_name)
 					r.close()
 					r2=br.open(link, timeout=12)
 					exewrite = open(exe_file_path, 'wb')

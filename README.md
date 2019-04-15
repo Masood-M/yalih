@@ -19,7 +19,7 @@ YALIH (Yet Another Low Interaction Honeyclient) is a low Interaction Client hone
 
 *Proxy capabilities to detect Geo-location and/or IP cloacking attacks
 
-*Signature detection using ClamAV and COMODO antivirus databases
+*Signature detection using ClamAV antivirus database
 
 *Anomaly and pattern matching detection through Yara (http://plusvic.github.io/yara/)
 
@@ -31,7 +31,7 @@ Easy Installation and documentation
 
 ====================================
 
-Authors/Developers:
+Authors/Contributors:
 
 ========= Victoria University of Wellington ============
 
@@ -40,5 +40,4 @@ Masood Mansoori - masood.mansoori@gmail.com
 ============ Singapore Polytechnic ===============
 
 Lai Qi Wei - laiqiwei30@hotmail.com
-
 Ritchie Lam Qiaowei - ritchielq@gmail.com

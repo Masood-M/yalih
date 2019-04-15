@@ -15,7 +15,7 @@ def scanning(path):
 	os.chdir(path)
 		
 	start_time = time.time()
-	with open(honeypotconfig.wdir + "scanlogs/Clam-report.log", "w") as f:
+	with open("scanlogs/Clam-report.log", "w") as f:
 		print "\n=============== ClamAV Antivirus Engine is running! Please Wait ===============" 
 		f.write("======================================ClamAV======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
