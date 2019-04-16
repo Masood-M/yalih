@@ -1,10 +1,11 @@
 import honeypotconfig
+import os
 
 infected_files = dict()
 
 
 def unquoteDirectory(path):
-	currentdir = os.cwd()[:-3]
+	currentdir = os.getcwd()[:-3]
 	# Open the Clam-AV log
 	with open(currentdir + "scanlogs/Clam-report.log") as f:
 		for line in f:

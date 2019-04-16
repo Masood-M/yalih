@@ -31,7 +31,7 @@ def domaindownload():# this function downloads domain and website links from mul
 		os.system(command1)
 #--proxy-user=username --proxy-password=password
 
-	if os.path.isfile(honeypotconfig.wdir+"list/list2.txt")==True:
+	if os.path.isfile("list/list2.txt")==True:
 		print "Malicious website database from https://zeustracker.abuse.ch/ exists!\n"
 		print "Continuing with the next list."
 	else:
@@ -40,11 +40,10 @@ def domaindownload():# this function downloads domain and website links from mul
 		os.system(command2)
 
 
-	if os.path.isfile(honeypotconfig.wdir+"list/list3.txt")==True:
+	if os.path.isfile("list/list3.txt")==True:
 		print "Malicious website database 3 exists!\n"
 	else:
 		print "Fetching list 3"
-#		command3="wget http://www.montanamenagerie.org/hostsfile/hosts.txt -O "+honeypotconfig.wdir+"list/list3.txt"
 		command3="wget http://hosts-file.net/hphosts-partial.asp -O list/list3.txt"
 		os.system(command3)
 

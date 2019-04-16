@@ -38,3 +38,6 @@ sudo pip install python-magic
 sudo pip install psutil
 sudo pip install tldextract
 sudo pip install mechanize
+
+apt-get install clamav
+sudo freshclam

@@ -13,7 +13,7 @@ import re, time, datetime
 
 def scanning(path):
 	os.chdir(path)
-	currentdir = os.cwd()[:-3]	
+	currentdir = os.getcwd()[:-3]	
 	start_time = time.time()
 	with open(currentdir + "scanlogs/Clam-report.log", "w") as f:
 		print "\n=============== ClamAV Antivirus Engine is running! Please Wait ===============" 
