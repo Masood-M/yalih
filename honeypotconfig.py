@@ -49,7 +49,7 @@ tmpfolder="tmp/" #followed by / sign
 threadnum=10
 
 #====JSBeautifier
-jsbeautifier = False
+jsbeautifier = True
 
 #====Add proxies in this format
 #===={"protocol" : "address:port"} {"http" : "60.220.212.12:80"}
