@@ -56,7 +56,7 @@ jsbeautifier = True
 proxy={}
 
 #====The maximum size for executables that would be downloaded, in kb
-exe_max_size = 180
+exe_max_size = 250
 
 #====HoneypotMonitor, in sec
 checkfrequency = 100
