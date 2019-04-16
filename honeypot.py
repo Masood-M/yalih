@@ -96,7 +96,7 @@ def main():
 	"""Initialize logger."""
 	command = "mkdir -p debug/" #create a temporary folder in your working space folder
 	os.system(command)
-	sys.stdin=open(debug/" +  time.asctime(time.localtime(time.time())) +".log", "a")
+	sys.stdin=open("debug/" +  time.asctime(time.localtime(time.time())) +".log", "a")
 	logger = logging.getLogger()
 	
 	sh = logging.StreamHandler()
