@@ -13,7 +13,6 @@ import urlparse
 import os.path
 import logging
 #from google import search
-import honeypotconfig
 import scan
 import executemechanize
 import extraction

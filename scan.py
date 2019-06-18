@@ -6,16 +6,17 @@ import os
 import string
 import urlparse
 import os.path
-import honeypotconfig
+
 import re, time, datetime
 
 
 
 def scanning(path):
 	os.chdir(path)
-	currentdir = os.getcwd()[:-3]	
+#	currentdir = os.getcwd()[:-3]	
 	start_time = time.time()
-	with open(currentdir + "scanlogs/Clam-report.log", "w") as f:
+	script_path = os.path.dirname(os.path.abspath( __file__ ))
+	with open(script_path + "/scanlogs/Clam-report.log", "w") as f:
 		print "\n=============== ClamAV Antivirus Engine is running! Please Wait ===============" 
 		f.write("======================================ClamAV======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")

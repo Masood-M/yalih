@@ -45,7 +45,7 @@ def create_directory(directory_name):
 		else:	
 			raise
 
-
+script_path = os.path.dirname(os.path.abspath( __file__ ))
 
 def executemechanize(urldict):
 	
@@ -123,7 +123,7 @@ def executemechanize(urldict):
 		first_char = re.sub(r"(http://|https://)?(www.)?", "", url)[:1]
 		second_char = re.sub(r"(http://|https://)?(www.)?", "", url)[1:3]
 
-		directory_name = os.path.join(honeypotconfig.tmpfolder, first_char,  second_char, fdirname)
+		directory_name = os.path.join("tmp/", first_char,  second_char, fdirname)
 
 		# If using proxy, names directory in the format ip_address:port
 		if honeypotconfig.proxy:
@@ -184,7 +184,7 @@ def executemechanize(urldict):
 					js_name = js_name[0:js_name.rfind("?")]
 
 				# Writes js file
-				js_file_path = os.path.join(honeypotconfig.tmpfolder, first_char, second_char, fdirname, "javascripts", js_name)
+				js_file_path = os.path.join("tmp/", first_char, second_char, fdirname, "javascripts", js_name)
 				if honeypotconfig.proxy:
 					proxyname = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
 					js_file_path = os.path.join(proxyname, first_char, second_char, fdirname, "javascripts", js_name)
@@ -228,7 +228,7 @@ def executemechanize(urldict):
 				exename = link[link.rfind("/") + 1:]
 				if size < honeypotconfig.exe_max_size:
 					logger.info(str(url_no) + ",\t" + url + ",\t" + "EXE retrieve,\t" + link)
-					exe_file_path = os.path.join(honeypotconfig.tmpfolder, first_char, second_char, fdirname, "exe", exename)
+					exe_file_path = os.path.join("tmp/".tmpfolder, first_char, second_char, fdirname, "exe", exename)
 					if honeypotconfig.proxy:
 						proxyname = re.search(r":\s?['\"](.*)\s?['\"]", str(honeypotconfig.proxy)).group(1)
 						exe_file_path = os.path.join(proxyname, first_char, second_char, fdirname, "exe", js_name)

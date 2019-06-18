@@ -65,7 +65,7 @@ def main():
 	thread = threading.Thread(target=threadmaker)
 	thread.setDaemon(True)
 	thread.start()
-
+	script_path = os.path.dirname(os.path.abspath( __file__ ))
 	parser = argparse.ArgumentParser(description="Examples:\n/honeypot.py --url www.yahoo.com\nhoneypot.py --file <file path>\n./honeypot.py --blacklist\n./honeypot.py --email\n./honeypot.py --update\n./honeypot.py --search <warez>\n./honeypot.py --local <file/directory path>", formatter_class=argparse.RawTextHelpFormatter)
 	parser.add_argument("--email", help="Retrieves your Spam emails from your mail server and crawls the extracted URLS. Enter your email credentials in honeypotconfig.py file!", action="store_true")
 	parser.add_argument("--update", help="Updates the anti-virus signatures", action="store_true")
@@ -80,11 +80,12 @@ def main():
 		parser.print_help()
 		sys.exit(1)
 	args = parser.parse_args()
-	path = honeypotconfig.tmpfolder
+	path = script_path+"/tmp"
+	print path
 
 
 #create the tmp folder
-	if not os.path.isdir(os.path.join(honeypotconfig.tmpfolder)):
+	if not os.path.isdir(path):
 		os.makedirs("tmp")           
 
 		

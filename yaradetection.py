@@ -13,21 +13,22 @@ import honeypotconfig
 
 
 def listandscan(path):
-	currentdir = os.getcwd()[:-3]
+
+	script_path = os.path.dirname(os.path.abspath( __file__ ))
 	start_timeYara = time.time()
 
-	with open(currentdir + "scanlogs/Yara-report.log", "w") as f:
+	with open(script_path + "/scanlogs/Yara-report.log", "w") as f:
 		print "\n===================================== Yara =====================================" 
 		f.write("======================================Yara======================================\n\n")
 		f.write(datetime.datetime.now().strftime("%A, %d %B %Y %I:%M:%S%p") + "\n\n")
 		f.write("--------------------------------------------------------------------------------\n\n")
 		os.system("find . -type f -size 0k -exec rm {} \; | awk '{ print $8 }'")
 
-		process = subprocess.Popen("yara -r " + currentdir + "yrules/rules.yara " + currentdir+path, shell=True, stdout=subprocess.PIPE)
+		process = subprocess.Popen("yara -r " + script_path+"/yrules/rules.yara " + script_path+"/tmp", shell=True, stdout=subprocess.PIPE)
 		for line in iter(process.stdout.readline, ''):
 			sys.stdout.write(line)
 			f.write(line)
-		f.write("\nyara -r " + currentdir + "yrules/rules.yara " + currentdir+path[:-1] + "\n\n")
+		f.write("\nyara -r " + script_path + "/yrules/rules.yara " + script_path +"/tmp/"+ "\n\n")
 		finish_time = time.time() - start_timeYara, "seconds"
 		f.write("Scanning time with Yara engine was: " + str(finish_time) + "\n\n")
 		print "================================================================================"
